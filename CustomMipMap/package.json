@@ -1,0 +1,13 @@
+{
+  "name": "com.seanlib.custommipmap",
+  "displayName": "SeanLib CustomMipmap",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "Editor",
+    "Texture"
+  ],
+  "category": "Editor",
+  "dependencies": {
+  }
+}

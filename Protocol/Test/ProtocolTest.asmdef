@@ -1,0 +1,21 @@
+{
+    "name": "ProtocolTest",
+    "references": [
+        "GUID:6286b2f7e3234504fb672b7709ef19ca",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:76aa88fa43b969c428cf4fcea4da8777"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+
+xsi:noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd"
+xsi:schemaLocation="
+                        UnityEngine.UIElements ../../../../../../UIElementsSchema/UnityEngine.UIElements.xsd
+                        UnityEditor.UIElements ../../../../../../UIElementsSchema/UnityEditor.UIElements.xsd
+                        UnityEditor.PackageManager.UI ../../../../../../UIElementsSchema/UnityEditor.PackageManager.UI.xsd
+"
+>
+  <engine:VisualElement class="Container">
+    <engine:VisualElement name="Item0" class="item">
+      <engine:Label text="Item0"/>
+      <engine:Button text="http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html?utm_source=tuicool"/>
+    </engine:VisualElement>
+    <Splitter xmlns="UIElements" name="Splitter" class="Splitter" Horizon="true" Target="Item0"/>
+    <engine:VisualElement name="Item1" class="item">
+      <engine:Label text="Item1"/>
+    </engine:VisualElement>
+    <engine:VisualElement name="Item2" class="item">
+      <engine:Label text="Item1"/>
+    </engine:VisualElement>
+    <engine:VisualElement name="Item3" class="item">
+      <engine:Label text="Item1"/>
+    </engine:VisualElement>
+  </engine:VisualElement>
+  <engine:IMGUIContainer name="BottomIMGUI" class="Bottom">
+  </engine:IMGUIContainer>
+</engine:UXML>

@@ -1,0 +1,14 @@
+{
+  "name": "com.seanlib.protocolcore",
+  "displayName": "SeanLib Protocol",
+  "version": "1.0.0",
+  "description": "\u5e8f\u5217\u5316\u5de5\u5177\uff0c\u5b8c\u5168\u81ea\u5b9a\u4e49\u7f16\u7801\uff0c\u9ad8\u5ea6\u53ef\u6269\u5c55API\u3002\n\u6bd4UnityJson\u5feb",
+  "keywords": [
+    "Serializer",
+    "Protocol"
+  ],
+  "category": "Serializer",
+  "dependencies": {
+    "com.seanlib.foundation": "1.0.0"
+  }
+}

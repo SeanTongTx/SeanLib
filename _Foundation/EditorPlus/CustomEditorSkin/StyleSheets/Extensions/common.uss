@@ -1,0 +1,7 @@
+﻿.dockHeader {
+    background-color: #314D79;
+}
+.dragtab
+{
+    background-color: #005454;
+}

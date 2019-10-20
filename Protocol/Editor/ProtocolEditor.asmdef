@@ -1,0 +1,19 @@
+{
+    "name": "ProtocolEditor",
+    "references": [
+        "GUID:6286b2f7e3234504fb672b7709ef19ca",
+        "GUID:76aa88fa43b969c428cf4fcea4da8777"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

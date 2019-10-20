@@ -1,0 +1,16 @@
+{
+    "name": "BaseTimeLine",
+    "references": [
+        "GUID:f06555f75b070af458a003d92f9efb00",
+        "GUID:850ef7b5d689062428b62ab8db2c6304"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
