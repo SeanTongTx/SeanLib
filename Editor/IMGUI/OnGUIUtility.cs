@@ -642,6 +642,11 @@ namespace EditorPlus
                     return new Rect(LastRect.x + LastRect.width, LastRect.y, LastRect.width, LastRect.height);
                 }
             }
+            public static void Header(string head)
+            {
+                GUILayout.Label(head, EditorStyles.boldLabel);
+                GUILayout.Box("", GUILayout.Height(1), GUILayout.ExpandWidth(true));
+            }
             public static void Line(float height=1)
             {
                 GUILayout.Box("", GUI.skin.box, GUILayout.Height(1), GUILayout.ExpandWidth(true));
@@ -966,10 +971,10 @@ namespace EditorPlus
             Vision.EndBackGroundColor();
             return b;
         }
+        [Obsolete("Use OnGUIUtility.Layout.Header instand ")]
         public static void Header(string head)
         {
-            GUILayout.Label(head, EditorStyles.boldLabel);
-            GUILayout.Box("", GUILayout.Height(1), GUILayout.ExpandWidth(true));
+            Layout.Header(head);
         }
         #endregion
         public class Debug

@@ -30,30 +30,27 @@ namespace EditorPlus
                 ImportButton = new GUIStyle("OL Title");
             }
         }
-        string[] packages;
-        string[] plugins;
-        AnimBool[] packageExtends;
-        AnimBool[] pluginExtends;
-
         Vector2 HomeScroll;
-        string PackStorageDir;
-        string LocalLibDir;
-        MarkDownDoc[] docs;
+        ListRequest r;
         public override void OnEnable(SeanLibManager drawer)
         {
             base.OnEnable(drawer);
-            packages = null;
-            plugins = null;
+            PackStorageDir = EditorUserSettings.GetConfigValue(".unitypackage:");
+            LocalLibDir = EditorUserSettings.GetConfigValue("LocalPlugins:");
             ReadRemotePluginsFile();
+            ReadPackageFold();
+            ReadLocalPlugin();
+
             RemotePlistEditor.OnEnable((info, index) =>
             {
-                OnGUIUtility.Vision.BeginBackGroundColor(index%2==0?OnGUIUtility.Colors.dark: OnGUIUtility.Colors.light);
+                OnGUIUtility.Vision.BeginBackGroundColor(index % 2 == 0 ? OnGUIUtility.Colors.dark : OnGUIUtility.Colors.light);
                 {
                     EditorGUILayout.BeginVertical();
                     if (OnGUIUtility.Foldout(info.Name, Styles.PackageTitle, GUILayout.ExpandWidth(true)))
                     {
                         info.Name = EditorGUILayout.DelayedTextField("Name", info.Name);
-                        info.URL = EditorGUILayout.DelayedTextField("URL", info.URL);
+                        info.URL = EditorGUILayout.TextField("URL", info.URL);
+                        info.version = (PluginVersion)EditorGUILayout.EnumPopup("Version", info.version);
                     }
                     EditorGUILayout.EndVertical();
                 }
@@ -63,7 +60,8 @@ namespace EditorPlus
             () =>
             {
                 return new PluginInfo();
-            },1,"+Plugin");
+            }, 1, "+Plugin");
+            r=Client.List();
         }
         private void GUIToolBar()
         {
@@ -71,7 +69,9 @@ namespace EditorPlus
             GUILayout.Label(Title, EditorStyles.toolbarButton, GUILayout.ExpandWidth(true));
             if (GUILayout.Button(EditorGUIUtility.IconContent("RotateTool"), EditorStyles.toolbarButton, GUILayout.Width(26)))
             {
+                ReadPackageFold();
                 ReadRemotePluginsFile();
+                ReadLocalPlugin();
             }
             GUILayout.EndHorizontal();
         }
@@ -85,6 +85,10 @@ namespace EditorPlus
         }
         public override void OnGUI()
         {
+            if(r.Status==StatusCode.Success)
+            {
+                var list = r.Result;
+            }
             SetupLayout();
             GUIToolBar();
             HomeScroll = GUILayout.BeginScrollView(HomeScroll);
@@ -115,6 +119,7 @@ namespace EditorPlus
             }
             if (EditorGUI.EndChangeCheck())
             {
+                ReadPackageFold();
             }
             if (EditRemotePlugins)
             {
@@ -124,84 +129,15 @@ namespace EditorPlus
             }
             //CheckDocs();
             //ShowDoc
-            OnGUIUtility.Layout.Line();
+            OnGUIUtility.Layout.Header("Packages");
             ShowPackages();
-            OnGUIUtility.Layout.Line();
+            OnGUIUtility.Layout.Header("Local");
             ShowLocalPlugins();
-            OnGUIUtility.Layout.Line();
+            OnGUIUtility.Layout.Header("Remote");
             ShowRemotePlugins();
-            /* for (int i = 0; i < packages.Length; i++)
-             {
-                 var package = packages[i];
-                 EditorGUILayout.BeginHorizontal();
-                 if (GUILayout.Button(Path.GetFileNameWithoutExtension(package), Styles.PackageTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)))
-                 {
-                     bool b = !packageExtends[i].target;
-                     foreach (var extend in packageExtends)
-                     {
-                         extend.target = false;
-                     }
-                     packageExtends[i].target = b;
-                 }
-                 if (GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
-                 {
-                     AssetDatabase.ImportPackage(package, true);
-                     //Process.Start(package);
-                 }
-                 EditorGUILayout.EndHorizontal();
-                 if (EditorGUILayout.BeginFadeGroup(packageExtends[i].faded))
-                 {
-                     EditorGUILayout.BeginVertical();
-                     if (docs[i] != null)
-                     {
-                         EditorMarkDownDrawer.DrawDoc(docs[i]);
-                     }
-                     else
-                     {
-                         EditorGUILayout.LabelField("Cant find MD document", EditorStyles.boldLabel);
-                     }
-                     EditorGUILayout.EndVertical();
-                 }
-                 EditorGUILayout.EndFadeGroup();
-             }
-             for (int i = 0; i < plugins.Length; i++)
-             {
-                 var plugin = plugins[i];
-                 EditorGUILayout.BeginHorizontal();
-                 if (GUILayout.Button(Directory.GetParent(plugin).Name, Styles.PackageTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)))
-                 {
-                     bool b = !pluginExtends[i].target;
-                     foreach (var extend in pluginExtends)
-                     {
-                         extend.target = false;
-                     }
-                     pluginExtends[i].target = b;
-                 }
-                 if (GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
-                 {
-                     Type type = typeof(UnityEditor.PackageManager.Client).Assembly.GetType("UnityEditor.PackageManager.UI.Package");
-                     var method = type.GetMethod("AddFromLocalDisk", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-                     method.Invoke(null, new object[] { plugin  });
-                     //TODO:
-                 }
-                 EditorGUILayout.EndHorizontal();
-                 if (EditorGUILayout.BeginFadeGroup(pluginExtends[i].faded))
-                 {
-                     EditorGUILayout.BeginVertical();
-                     if (docs[packages.Length + i] != null)
-                     {
-                         EditorMarkDownDrawer.DrawDoc(docs[packages.Length + i]);
-                     }
-                     else
-                     {
-                         EditorGUILayout.LabelField("Cant find MD document", EditorStyles.boldLabel);
-                     }
-                     EditorGUILayout.EndVertical();
-                 }
-                 EditorGUILayout.EndFadeGroup();
-             }*/
             GUILayout.EndScrollView();
         }
+
         public override void OnDisable()
         {
             if (packageExtends != null)
@@ -230,21 +166,179 @@ namespace EditorPlus
         }
         #region packages
 
+        PluginList PackagePlugins = new PluginList();
+        string PackStorageDir=string.Empty;
+        AnimBool[] packageExtends;
+        private void ReadPackageFold()
+        {
+            if (PackStorageDir.IsNullOrEmpty()) return;
+            PackagePlugins.Plugins.Clear();
+            string[] packages = Directory.GetFiles(PackStorageDir, "*.unitypackage", SearchOption.AllDirectories);
+            if (packageExtends != null)
+            {
+                foreach (var item in packageExtends)
+                {
+                    item.valueChanged.RemoveListener(window.Repaint);
+                }
+            }
+            packageExtends = new AnimBool[packages.Length];
+            for (int i = 0; i < packages.Length; i++)
+            {
+                packageExtends[i] = new AnimBool(false);
+                packageExtends[i].valueChanged.AddListener(window.Repaint);
+            }
+            //DOC
+            for (int i = 0; i < packages.Length; i++)
+            {
+                PluginInfo plugin = new PluginInfo();
+                
+                var packageName = Path.GetFileNameWithoutExtension(packages[i]);
+                var docDir = PackStorageDir + "/docs/" + packageName + "/";
+                var introPath = docDir + "README.md";
+                if (File.Exists(introPath))
+                {
+                    string rawDoc = File.ReadAllText(introPath);
+                    plugin.doc = new MarkDownDoc(docDir, rawDoc);                    
+                }
+                plugin.type = PluginType.Packages;
+                //plugin.version = PluginVersion.Release;
+                plugin.Name = packageName;
+                plugin.URL = packages[i];
+                PackagePlugins.Plugins.Add(plugin);
+            }
+        }
+
         private void ShowPackages()
         {
-            foreach (var item in remoteplugins)
-            {
-                EditorGUILayout.LabelField(item.Name);
-            }
+            for (int i = 0; i < PackagePlugins.Plugins.Count; i++)
+             {
+                 var package = PackagePlugins.Plugins[i];
+                 EditorGUILayout.BeginHorizontal();
+                 if (GUILayout.Button(package.Name, Styles.PackageTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)))
+                 {
+                     bool b = !packageExtends[i].target;
+                     foreach (var extend in packageExtends)
+                     {
+                         extend.target = false;
+                     }
+                     packageExtends[i].target = b;
+                 }
+                 if (GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
+                 {
+                     AssetDatabase.ImportPackage(package.URL, true);
+                     //Process.Start(package);
+                 }
+                 EditorGUILayout.EndHorizontal();
+                 if (EditorGUILayout.BeginFadeGroup(packageExtends[i].faded))
+                 {
+                     EditorGUILayout.BeginVertical();
+                     if (package.doc!=null)
+                     {
+                         EditorMarkDownDrawer.DrawDoc(package.doc);
+                     }
+                     else
+                     {
+                         EditorGUILayout.LabelField("Cant find MD document", EditorStyles.boldLabel);
+                     }
+                     EditorGUILayout.EndVertical();
+                 }
+                 EditorGUILayout.EndFadeGroup();
+             }
         }
         #endregion
         #region Local
 
+        PluginList LocalPlugins = new PluginList();
+        string LocalLibDir;
+        AnimBool[] pluginExtends;
+        private void ReadLocalPlugin()
+        {
+            string[] plugins= Directory.GetFiles(LocalLibDir, "package.json", SearchOption.AllDirectories);
+            LocalPlugins.Plugins.Clear();
+            if (pluginExtends != null)
+            {
+                foreach (var item in pluginExtends)
+                {
+                    item.valueChanged.RemoveListener(window.Repaint);
+                }
+            }
+            pluginExtends = new AnimBool[plugins.Length];
+            for (int i = 0; i < pluginExtends.Length; i++)
+            {
+                pluginExtends[i] = new AnimBool(false);
+                pluginExtends[i].valueChanged.AddListener(window.Repaint);
+            }
+            for (int i = 0; i < plugins.Length; i++)
+            {
+                PluginInfo plugin = new PluginInfo();
+                var pluginURL = plugins[i].Replace(@"\","/");
+                var dir = Directory.GetParent(pluginURL);
+                var pluginName = dir.Name;
+                var pluginDocPath = dir.FullName + "/README.md";
+                if (File.Exists(pluginDocPath))
+                {
+                    string rawDoc = File.ReadAllText(pluginDocPath);
+                    plugin.doc = new MarkDownDoc(dir.FullName+"/", rawDoc);
+                }
+                plugin.Name = pluginName;
+                plugin.URL = pluginURL;
+                plugin.type = PluginType.Local;
+                //plugin.version
+                LocalPlugins.Plugins.Add(plugin);
+            }
+        }
         private void ShowLocalPlugins()
         {
-            foreach (var item in remoteplugins)
+            for (int i = 0; i < LocalPlugins.Plugins.Count; i++)
             {
-                EditorGUILayout.LabelField(item.Name);
+                var package = LocalPlugins.Plugins[i];
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(package.Name, Styles.PackageTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)))
+                {
+                    bool b = !pluginExtends[i].target;
+                    foreach (var extend in pluginExtends)
+                    {
+                        extend.target = false;
+                    }
+                    pluginExtends[i].target = b;
+                }
+                if (request != null && request.Status == StatusCode.InProgress)
+                {
+                    if (package.Name == ProgressingPlugin)
+                    {
+                        var rect = GUILayoutUtility.GetLastRect();
+                        fake += (Time.deltaTime / 200f);
+                        if (fake >= hints.Length)
+                        {
+                            fake = 0;
+                        }
+                        EditorGUI.ProgressBar(rect, fake - (float)((int)fake), hints[(int)fake]);
+                        window.Repaint();
+                    }
+                    OnGUIUtility.Vision.GUIEnabled(false);
+                }
+                if (!string.IsNullOrEmpty(package.URL) && GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
+                {
+                    ProgressingPlugin = package.Name;
+                    fake = UnityEngine.Random.Range(0, hints.Length);
+                    request = Client.Add(package.URL);
+                }
+                OnGUIUtility.Vision.GUIEnabled(true);
+                EditorGUILayout.EndHorizontal();
+                if (EditorGUILayout.BeginFadeGroup(pluginExtends[i].faded))
+                {
+                    EditorGUILayout.BeginVertical();
+                    if (package.doc != null)
+                    {
+                        EditorMarkDownDrawer.DrawDoc(package.doc);
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField("Cant find MD document", EditorStyles.boldLabel);
+                    }
+                    EditorGUILayout.EndVertical();
+                }
+                EditorGUILayout.EndFadeGroup();
             }
         }
         #endregion
@@ -255,7 +349,12 @@ namespace EditorPlus
         PluginList remoteplugins;
         bool EditRemotePlugins;
         AnimBool[] RemotepluginExtends;
-
+        static AddRequest request;
+        static string ProgressingPlugin;
+        float fake;
+        string[] hints = new string[] { "这个读条完全是假的", "API里没有进度信息", "要爬多久还不是得看网有多快",
+            "一次下载一个GitHub都很卡","关了窗口他也在爬","开始了就停不下来","居然做了真做出了这个读条，感觉真蠢",
+        "加载过一次会有缓存，快很多",};
         OnGUIUtility.Grid.GridContainer<PluginInfo> RemotePlistEditor = new OnGUIUtility.Grid.GridContainer<PluginInfo>();
         private void ShowRemotePlugins()
         {
@@ -274,11 +373,28 @@ namespace EditorPlus
                         }
                         RemotepluginExtends[i].target = b;
                     }
-                    if(!string.IsNullOrEmpty(item.URL)&& GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
+                    if (request != null && request.Status == StatusCode.InProgress)
                     {
-                        var packageId = item.Name.ToLower();
-                        Client.Add(item.URL);
+                        if (item.Name == ProgressingPlugin)
+                        {
+                            var rect = GUILayoutUtility.GetLastRect();
+                            fake += (Time.deltaTime / 200f);
+                            if(fake>=hints.Length)
+                            {
+                                fake = 0;
+                            }
+                            EditorGUI.ProgressBar(rect, fake-(float)((int)fake),hints[(int)fake]);
+                            window.Repaint();
+                        }
+                        OnGUIUtility.Vision.GUIEnabled(false);
                     }
+                    if (!string.IsNullOrEmpty(item.URL)&& GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
+                    {
+                        ProgressingPlugin = item.Name;
+                        fake = UnityEngine.Random.Range(0, hints.Length);
+                        request = Client.Add(item.URL);
+                    }
+                    OnGUIUtility.Vision.GUIEnabled(true);
                 }
                 EditorGUILayout.EndHorizontal();
                 if (EditorGUILayout.BeginFadeGroup(RemotepluginExtends[i].faded))
@@ -325,8 +441,8 @@ namespace EditorPlus
                1. SeanLib Import by SeanLib.unitypackage .Then these config will store in your project Assets.
                2. SeanLib Import by package.json in Local file.Then these config will store in folder your localPlugin storaged.
                3. SeanLib Import by package.json/URL Online.Then these config will store in your project Libary", MessageType.Warning);
-            RemotePlistEditor.OnGUI(remoteplugins.Plugins);
             remoteScroll = EditorGUILayout.BeginScrollView(remoteScroll);
+            RemotePlistEditor.OnGUI(remoteplugins.Plugins);
             EditorGUILayout.EndScrollView();
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space();
@@ -347,77 +463,5 @@ namespace EditorPlus
         }
         #endregion
 
-        private void CheckDocs()
-        {
-            if (EditorGUI.EndChangeCheck() || packages == null || plugins == null)
-            {
-                packages = Directory.GetFiles(PackStorageDir, "*.unitypackage", SearchOption.AllDirectories);
-                plugins = Directory.GetFiles(LocalLibDir, "package.json", SearchOption.AllDirectories);
-                //Packages
-                if (packageExtends != null)
-                {
-                    foreach (var item in packageExtends)
-                    {
-                        item.valueChanged.RemoveListener(window.Repaint);
-                    }
-                }
-                packageExtends = new AnimBool[packages.Length];
-                for (int i = 0; i < packages.Length; i++)
-                {
-                    packageExtends[i] = new AnimBool(false);
-                    packageExtends[i].valueChanged.AddListener(window.Repaint);
-                }
-                //Plugins
-                if (pluginExtends != null)
-                {
-                    foreach (var item in pluginExtends)
-                    {
-                        item.valueChanged.RemoveListener(window.Repaint);
-                    }
-                }
-                pluginExtends = new AnimBool[plugins.Length];
-                for (int i = 0; i < plugins.Length; i++)
-                {
-                    pluginExtends[i] = new AnimBool(false);
-                    pluginExtends[i].valueChanged.AddListener(window.Repaint);
-                }
-                //DOC
-                var mdlist = new List<MarkDownDoc>();
-                for (int i = 0; i < packages.Length; i++)
-                {
-                    var packageName = Path.GetFileNameWithoutExtension(packages[i]);
-                    var docDir = PackStorageDir + "/docs/" + packageName + "/";
-                    var introPath = docDir + "Introduction.md";
-                    if (File.Exists(introPath))
-                    {
-                        string rawDoc = File.ReadAllText(introPath);
-                        var doc = new MarkDownDoc(docDir, rawDoc);
-                        mdlist.Add(doc);
-                    }
-                    else
-                    {
-                        mdlist.Add(null);
-                    }
-                }
-                for (int i = 0; i < plugins.Length; i++)
-                {
-                    var packageName = Directory.GetParent(plugins[i]).Name;
-                    var docDir = LocalLibDir + "/" + packageName + "/";
-                    var introPath = docDir + "README.md";
-                    if (File.Exists(introPath))
-                    {
-                        string rawDoc = File.ReadAllText(introPath);
-                        var doc = new MarkDownDoc(docDir, rawDoc);
-                        mdlist.Add(doc);
-                    }
-                    else
-                    {
-                        mdlist.Add(null);
-                    }
-                }
-                docs = mdlist.ToArray();
-
-            }
-        }
     }
 }

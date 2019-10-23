@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EditorPlus;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
@@ -41,4 +42,6 @@ public class PluginInfo
     public PluginVersion version=PluginVersion.Internal;
     [NonSerialized]
     public PluginType type;
+    [NonSerialized]
+    public MarkDownDoc doc;
 }
