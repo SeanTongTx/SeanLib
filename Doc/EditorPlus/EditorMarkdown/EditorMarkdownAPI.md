@@ -87,3 +87,12 @@ QA 如何使用QA语法？
 其中Qustion问题，添加在 第一个标签之后。
 问答块，在Seanlibwindow中可以搜索相关问题。需要通过脚本开启搜索功能。
 QA
+
+### 折叠页
+ /{ 折叠页演示
+<color="red">效果如下:EditorMD特有功能，只在UnityEditor中有效用部分内容折叠。</color>
+ /}
+
+/{ 折叠名称
+<color="red">效果如下:EditorMD特有功能，只在UnityEditor有效用部分内容折叠。</color>
+/}

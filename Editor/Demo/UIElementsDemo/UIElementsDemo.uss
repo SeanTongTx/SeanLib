@@ -1,0 +1,40 @@
+/*对所有的Label组件生效*/
+Label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(68, 138, 255);
+}
+.Root
+{
+	flex:auto;
+	flex-direction: column;
+}
+/* Container类生效*/
+.Container
+{
+	/*margin:5px;
+	border:3px;
+	padding:2px;*/
+	flex-direction:row;/*弹性布局 行排列*/
+	/*flex-wrap:wrap;自动换行*/
+	flex:1;
+}
+.Container>.item
+{
+	flex:1;
+}
+.Splitter
+{
+	width:1px;
+	background-color:#575757;
+}
+.Splitter>#SplitterDragBar
+{
+	width:10px;
+	flex:1;
+	align-self:center;/*相对父节点 中心对齐*/
+}
+.Bottom
+{
+	flex-basis:100px;
+}
