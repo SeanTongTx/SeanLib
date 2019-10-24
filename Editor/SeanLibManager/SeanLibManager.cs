@@ -1,14 +1,15 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEditorInternal;
 using UnityEngine;
-
 namespace EditorPlus
 {
     public class SeanLibManager : EditorWindow
     {
+
         [MenuItem("Window/SeanLib &#1")]
         public static void ShowWindow()
         {
@@ -18,6 +19,10 @@ namespace EditorPlus
         static class styles
         {
             public static GUIStyle Area;
+            static styles()
+            {
+                styles.Area = new GUIStyle("RL Background");
+            }
         }
 
         #region Layout
@@ -45,12 +50,8 @@ namespace EditorPlus
                 ShowNotification(new GUIContent("Compiling..."));
                 return;
             }
-            SetupLayout();
-
             RootLayout.OnGUI(new Rect(Vector2.zero, position.size), Repaint, DrawLibIndex, DrawEditor);
         }
-
-
         private void OnDisable()
         {
             foreach (var item in libIndex.editors)
@@ -60,10 +61,6 @@ namespace EditorPlus
             }
         }
 
-        protected virtual void SetupLayout()
-        {
-            styles.Area = styles.Area ?? new GUIStyle("RL Background");
-        }
         protected virtual void DrawLibIndex()
         {
             libIndex.OnGUI(RootLayout.Area0);

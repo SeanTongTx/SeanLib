@@ -18,6 +18,8 @@ namespace EditorPlus
     public class HomePage : EditorMarkDownWindow
     {
         private bool coding = true;
+        public const string packageKey= ".unitypackage:";
+        public const string localKey = "LocalPlugins:";
         public override string RelativePath => "../../../Doc";
         static class Styles
         {
@@ -34,8 +36,8 @@ namespace EditorPlus
         public override void OnEnable(SeanLibManager drawer)
         {
             base.OnEnable(drawer);
-            PackStorageDir = EditorUserSettings.GetConfigValue(".unitypackage:");
-            LocalLibDir = EditorUserSettings.GetConfigValue("LocalPlugins:");
+            PackStorageDir = EditorUserSettings.GetConfigValue(packageKey);
+            LocalLibDir = EditorUserSettings.GetConfigValue(localKey);
             ReadRemotePluginsFile();
             ReadPackageFold();
             ReadLocalPlugin();
@@ -89,8 +91,8 @@ namespace EditorPlus
             ShowIndexDoc();
             EditorGUI.BeginChangeCheck();
             {
-                PackStorageDir = OnGUIUtility.OpenFolderPannel(".unitypackage:");
-                LocalLibDir = OnGUIUtility.OpenFolderPannel("LocalPlugins:");
+                PackStorageDir = OnGUIUtility.OpenFolderPannel(packageKey);
+                LocalLibDir = OnGUIUtility.OpenFolderPannel(localKey);
                 OnGUIUtility.Vision.GUIEnabled(false);
                 var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
                 EditorGUILayout.BeginHorizontal();

@@ -1,55 +1,54 @@
-﻿// ----------------------------------------------------------------------------
-// <copyright file="TortoiseSVNMenu.cs" company="上海序曲网络科技有限公司">
-// Copyright (C) 2015 上海序曲网络科技有限公司
-// All rights are reserved. Reproduction or transmission in whole or in part, in
-// any form or by any means, electronic, mechanical or otherwise, is prohibited 
-// without the prior written consent of the copyright owner.
-// </copyright>
-// <author>HuHuiBin</author>
-// <date>12/3/2016</date>
-// ----------------------------------------------------------------------------
-
-namespace SeanLib.ThridPartyTool.Tools.TortoiseSVN.Editor
+﻿
+namespace SeanLib.TortoiseSVN.Editor
 {
+#if EDITORPLUS
     using EditorPlus;
     using ServiceTools.Reflect;
+#endif
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
     using UnityEditor;
-
     using UnityEngine;
-
     using Object = UnityEngine.Object;
+#if EDITORPLUS
     [CustomSeanLibEditor("Other/TortoiseSVN", order = 100)]
     public class TortoiseSVNMenu : SeanLibEditor
+#else
+    public class TortoiseSVNMenu : EditorWindow
+#endif
     {
+
         [MenuItem("Assets/TortoiseSVN/Setting", false, 119)]
         //[MenuItem("Tools/SVNSetting")]
         private static void Setting()
         {
+#if EDITORPLUS
             var tortoiseSvnMenu = EditorWindow.GetWindow<SeanLibManager>();
             var item = tortoiseSvnMenu.SeachIndex("Other/TortoiseSVN");
             if (item != null)
             {
                 tortoiseSvnMenu.SelectIndex(item.id);
             }
+#else
+            var tortoiseSvnMenu = EditorWindow.GetWindow<TortoiseSVNMenu>();
+#endif
         }
 
-        [MenuItem("Assets/TortoiseSVN/Commit", false, 113)]
+        [MenuItem("Assets/TortoiseSVN/Commit", false, 111)]
         private static void SVNCommit()
         {
             TortoiseSVNCommit(GetSelectionPath());
         }
 
-        [MenuItem("Assets/TortoiseSVN/Update", false, 112)]
+        [MenuItem("Assets/TortoiseSVN/Update", false, 110)]
         private static void SVNUpdate()
         {
             TortoiseSVNUpdate(GetSelectionPath());
         }
-        [MenuItem("Assets/TortoiseSVN/UpdateAll", false, 113)]
+        [MenuItem("Assets/TortoiseSVN/UpdateAll", false, 112)]
         private static void UpdateAll()
         {
             List<string> paths = SubSVNSetting.Paths;
@@ -68,13 +67,13 @@ namespace SeanLib.ThridPartyTool.Tools.TortoiseSVN.Editor
 
         public static void TortoiseSVNUpdate(params string[] path)
         {
-            RunCmd(TortoiseSVNSetting.TortoiseProcPath, string.Format("/command:update  /path:\"{0}\"", BuildPath(path)));
+            RunCmd(TortoiseSVNSetting.TortoiseProcPath, string.Format("/command:update  /path:\"{0}\"", path));
             AssetDatabase.Refresh();
         }
 
         public static void TortoiseSVNCommit(params string[] path)
         {
-            RunCmd(TortoiseSVNSetting.TortoiseProcPath, string.Format("/command:commit  /path:\"{0}\"", BuildPath(path)));
+            RunCmd(TortoiseSVNSetting.TortoiseProcPath, string.Format("/command:commit  /path:\"{0}\"", path));
             AssetDatabase.Refresh();
         }
 
@@ -152,24 +151,16 @@ namespace SeanLib.ThridPartyTool.Tools.TortoiseSVN.Editor
             return result;
         }
 
-        private static List<ITortoiseSVNSettingEditor> settingEditors;
+        private static List<ITortoiseSVNSettingEditor> settingEditors = new List<ITortoiseSVNSettingEditor>() { new TortoiseSVNSetting(), new SubSVNSetting() };
 
         private static Vector2 scrollView;
+#if EDITORPLUS
         public override void OnGUI()
+#else
+        public void OnGUI()
+#endif
         {
             scrollView = GUILayout.BeginScrollView(scrollView);
-            if (settingEditors == null)
-            {
-                settingEditors = new List<ITortoiseSVNSettingEditor>();
-                var types = AssemblyTool.FindTypesInCurrentDomainWhereExtend<ITortoiseSVNSettingEditor>();
-                foreach (var type in types)
-                {
-                    var tortoiseSvnSettingEditor = ReflecTool.Instantiate(type) as ITortoiseSVNSettingEditor;
-                    settingEditors.Add(tortoiseSvnSettingEditor);
-                }
-                settingEditors.Sort(
-                    (l, r) => l.GetTortoiseSVNSettingOrder() - r.GetTortoiseSVNSettingOrder());
-            }
             for (int i = 0; i < settingEditors.Count; i++)
             {
                 var tortoiseSvnSettingEditor = settingEditors[i];
@@ -194,6 +185,12 @@ namespace SeanLib.ThridPartyTool.Tools.TortoiseSVN.Editor
                     _Paths = new List<string>();
                     string path = Application.dataPath;
                     AllDir(path);
+#if EDITORPLUS
+                    var PackStorageDir = EditorUserSettings.GetConfigValue(HomePage.packageKey);
+                    var LocalLibDir = EditorUserSettings.GetConfigValue(HomePage.localKey);
+                    AllDir(LocalLibDir);
+                    AllDir(PackStorageDir);
+#endif
                     _Paths.Add(Application.dataPath);
                 }
                 return _Paths;
@@ -213,7 +210,8 @@ namespace SeanLib.ThridPartyTool.Tools.TortoiseSVN.Editor
 
         private static void AllDir(string dirRoot)
         {
-            string[] dirs = Directory.GetDirectories(dirRoot);
+            List<string> dirs =new List<string>(Directory.GetDirectories(dirRoot));
+
             string directoryName = "";
             foreach (var dir in dirs)
             {
