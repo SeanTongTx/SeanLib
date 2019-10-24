@@ -31,7 +31,6 @@ namespace EditorPlus
             }
         }
         Vector2 HomeScroll;
-        ListRequest r;
         public override void OnEnable(SeanLibManager drawer)
         {
             base.OnEnable(drawer);
@@ -61,7 +60,6 @@ namespace EditorPlus
             {
                 return new PluginInfo();
             }, 1, "+Plugin");
-            r=Client.List();
         }
         private void GUIToolBar()
         {
@@ -85,10 +83,6 @@ namespace EditorPlus
         }
         public override void OnGUI()
         {
-            if(r.Status==StatusCode.Success)
-            {
-                var list = r.Result;
-            }
             SetupLayout();
             GUIToolBar();
             HomeScroll = GUILayout.BeginScrollView(HomeScroll);
@@ -271,7 +265,7 @@ namespace EditorPlus
             for (int i = 0; i < plugins.Length; i++)
             {
                 PluginInfo plugin = new PluginInfo();
-                var pluginURL = plugins[i].Replace(@"\","/");
+                var pluginURL = plugins[i].Replace(@"/",@"\");
                 var dir = Directory.GetParent(pluginURL);
                 var pluginName = dir.Name;
                 var pluginDocPath = dir.FullName + "/README.md";
@@ -302,28 +296,18 @@ namespace EditorPlus
                     }
                     pluginExtends[i].target = b;
                 }
-                if (request != null && request.Status == StatusCode.InProgress)
-                {
-                    if (package.Name == ProgressingPlugin)
-                    {
-                        var rect = GUILayoutUtility.GetLastRect();
-                        fake += (Time.deltaTime / 200f);
-                        if (fake >= hints.Length)
-                        {
-                            fake = 0;
-                        }
-                        EditorGUI.ProgressBar(rect, fake - (float)((int)fake), hints[(int)fake]);
-                        window.Repaint();
-                    }
-                    OnGUIUtility.Vision.GUIEnabled(false);
-                }
                 if (!string.IsNullOrEmpty(package.URL) && GUILayout.Button("Import", Styles.ImportButton, GUILayout.Width(80)))
                 {
-                    ProgressingPlugin = package.Name;
-                    fake = UnityEngine.Random.Range(0, hints.Length);
-                    request = Client.Add(package.URL);
+                    if (EditorUtility.DisplayDialog(@"Import LocalPlugin", @"导入本地插件时，插件不会复制到项目内，而是存储在原本的目录中，通过绝对路径引用。
+因此不能将项目分享给其他用户！", "这是本地项目", "这是合作项目"))
+                    {
+#if UNITY_2019_2_OR_NEWER
+                        var Internal_packageType = typeof(Client).Assembly.GetType("UnityEditor.PackageManager.UI.Package");
+                        var addLocalMethod = Internal_packageType.GetMethod("AddFromLocalDisk", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                        addLocalMethod.Invoke(null, new object[] { package.URL });
+#endif
+                    }
                 }
-                OnGUIUtility.Vision.GUIEnabled(true);
                 EditorGUILayout.EndHorizontal();
                 if (EditorGUILayout.BeginFadeGroup(pluginExtends[i].faded))
                 {
@@ -341,9 +325,9 @@ namespace EditorPlus
                 EditorGUILayout.EndFadeGroup();
             }
         }
-        #endregion
+#endregion
 
-        #region RemotePlugin
+#region RemotePlugin
 
         Vector2 remoteScroll;
         PluginList remoteplugins;
@@ -461,7 +445,7 @@ namespace EditorPlus
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
         }
-        #endregion
+#endregion
 
     }
 }

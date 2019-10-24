@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace EditorPlus
@@ -34,8 +35,8 @@ namespace EditorPlus
             libIndex = new SeanLibIndex(indexState);
             libIndex.RefreshTreeData(this);
             libIndex.SetSelection(new List<int>() { EditorPrefs.GetInt("SeanLibIndex", 1) });
+            this.wantsMouseMove = true;
         }
-
         Vector2 v;
         private void OnGUI()
         {
