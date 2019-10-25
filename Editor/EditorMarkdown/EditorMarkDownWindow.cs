@@ -30,47 +30,6 @@ namespace EditorPlus
         {
             base.OnEnable(drawer);
             var docAssetDir = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
-            //因为有一些文档放在Package目录中 而Package又不一定在项目文件夹下 所以这个方法无效
-            /* var scriptFilePath = PathTools.Asset2File(docAssetDir);
-             List<string> dirs = new List<string>(Directory.GetDirectories(Path.GetDirectoryName(scriptFilePath),"",SearchOption.AllDirectories));// new List<string>(Directory.GetDirectories(Application.dataPath, PathRoot, SearchOption.AllDirectories));
-             string DirRoot = Application.dataPath;
-             if (dirs.Count > 0)
-             {
-                 dirs.Sort((l, r) => { return l.Length - r.Length; });
-
-                 DirRoot = LoadPath.replaceToUnity(dirs[0]) + "/";
-             }
-
-             List<string> docPath = new List<string>();
-             foreach (var dir in dirs)
-             {
-                 docPath.AddRange(Directory.GetFiles(dir, "*.md", SearchOption.AllDirectories));
-             }
-             docPath.Sort((l, r) =>
-             {
-                 var lDir = LoadPath.replaceToUnity(Path.GetDirectoryName(l).Replace(DirRoot, ""));
-                 var rDir = LoadPath.replaceToUnity(Path.GetDirectoryName(r).Replace(DirRoot, ""));
-                 int lCount = lDir.Split('/').Length;
-                 int rCount = rDir.Split('/').Length;
-                 return lCount - rCount;
-             });
-
-             foreach (var path in docPath)
-             {
-                 var docDir = Path.GetDirectoryName(path) + "/";
-                 var docName = Path.GetFileNameWithoutExtension(path);
-                 string rawDoc = File.ReadAllText(path);
-                 var doc = new MarkDownDoc(docDir, rawDoc);
-                 if (Docs.ContainsKey(docName))
-                 {
-                     var subDir = LoadPath.replaceToUnity(docDir).Replace(DirRoot, "");
-                     Docs[subDir + docName] = doc;
-                 }
-                 else
-                 {
-                     Docs[docName] = doc;
-                 }
-             }*/
             var subAssets = AssetDatabase.FindAssets("", new string[] { docAssetDir });
             List<string> docPath = new List<string>();
             foreach (var item in subAssets)
@@ -164,7 +123,8 @@ namespace EditorPlus
             if (GUILayout.Button("E", EditorStyles.toolbarButton, GUILayout.Width(20)))
             {
                 var doc = Docs[CurrentDocName];
-                var assetPath = doc.AssetDir + "/" + CurrentDocName + ".md";
+                var index = CurrentDocName.LastIndexOf("/")+1;
+                var assetPath = doc.AssetDir + "/" + CurrentDocName.Substring(index, CurrentDocName.Length- index) + ".md";
                 // assetPath = "Assets" + assetPath.Replace(Application.dataPath, "");
                 var obj = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
                 AssetDatabase.OpenAsset(obj);

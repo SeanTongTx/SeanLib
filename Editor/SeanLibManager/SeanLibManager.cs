@@ -61,16 +61,17 @@ namespace EditorPlus
             }
         }
 
-        protected virtual void DrawLibIndex()
+        protected virtual void DrawLibIndex(Rect position)
         {
             libIndex.OnGUI(RootLayout.Area0);
         }
-        protected virtual void DrawEditor()
+        protected virtual void DrawEditor(Rect position)
         {
             if (indexState.selectedIDs.Count != 0)
             {
                 //Draw one editor
                 var editor = libIndex.GetEditor(indexState.selectedIDs[0]);
+                editor.position = position;
                 if (Event.current.type == EventType.Repaint)
                 {
                     EditorPrefs.SetInt("SeanLibIndex", indexState.selectedIDs[0]);

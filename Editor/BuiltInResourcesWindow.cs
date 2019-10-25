@@ -2,16 +2,10 @@
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
-
-public class BuiltInResourcesWindow : EditorWindow
+using EditorPlus;
+[CustomSeanLibEditor("EditorPlus/BuiltInResources")]
+public class BuiltInResourcesWindow : SeanLibEditor
 {
-    //[MenuItem("Window/Built-in styles and icons")]
-    public static void ShowWindow()
-    {
-        BuiltInResourcesWindow w = (BuiltInResourcesWindow)EditorWindow.GetWindow<BuiltInResourcesWindow>();
-        w.Show();
-    }
-
     private struct Drawing
     {
         public Rect Rect;
@@ -29,9 +23,9 @@ public class BuiltInResourcesWindow : EditorWindow
     private bool _showingIcons = false;
 
     private string _search = "";
-
-    void OnGUI()
+    public override void OnGUI()
     {
+        base.OnGUI();
         if (position.width != _oldPosition.width && Event.current.type == EventType.Layout)
         {
             Drawings = null;

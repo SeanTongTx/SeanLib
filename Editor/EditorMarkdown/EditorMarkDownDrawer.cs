@@ -75,10 +75,12 @@ namespace EditorPlus
             {
                 case KeyType.foldin:
                     data.doc.InFoldout = true;
-                    data.doc.CurrentFoldout = OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
+                    data.doc.CurrentFoldout = OnGUIUtility.Foldout( data.keyValue, MDStyles.Title3, GUILayout.ExpandWidth(true),GUILayout.Height(EditorGUIUtility.singleLineHeight));// OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
+                    OnGUIUtility.Layout.IndentBegin(2);
                     break;
                 case KeyType.foldout:
                     data.doc.InFoldout = false;
+                    OnGUIUtility.Layout.IndentEnd(2);
                     break;
             }
             if (data.doc.InFoldout &&!data.doc.CurrentFoldout)

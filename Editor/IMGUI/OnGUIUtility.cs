@@ -293,7 +293,7 @@ namespace EditorPlus
                 DivideLineStyle = DivideLineStyle ?? new GUIStyle("Tooltip");
                 GUI.Box(DivideLine, "", DivideLineStyle);
             }
-            public void OnGUI(Rect rect, Action RepaintAPI, Action DrawArea0, Action DrawArea1)
+            public void OnGUI(Rect rect, Action RepaintAPI, Action<Rect> DrawArea0, Action<Rect> DrawArea1)
             {
                 Area1 = OnGUIUtility.Layout.Divide.Divide2Horizontal(rect, out Area0, Area0Size);
                 Area0.width -= 1;
@@ -307,10 +307,10 @@ namespace EditorPlus
                     RepaintAPI();
                 }
                 GUILayout.BeginArea(Area0);
-                DrawArea0();
+                DrawArea0(new Rect(0,0,Area0.width,Area0.height));
                 GUILayout.EndArea();
                 GUILayout.BeginArea(Area1);
-                DrawArea1();
+                DrawArea1(new Rect(0, 0, Area1.width, Area1.height));
                 GUILayout.EndArea();
             }
             public void OnGUILayout(Action RepaintAPI, Action DrawArea0, Action DrawArea1, GUIStyle style = null, params GUILayoutOption[] options)
@@ -661,13 +661,13 @@ namespace EditorPlus
                 EditorGUI.indentLevel = 0;
             }
 
-            public static void IndentBegin()
+            public static void IndentBegin(int depth=1)
             {
-                EditorGUI.indentLevel++;
+                EditorGUI.indentLevel += depth;
             }
-            public static void IndentEnd()
+            public static void IndentEnd(int depth = 1)
             {
-                EditorGUI.indentLevel--;
+                EditorGUI.indentLevel-= depth;
             }
         }
         #endregion

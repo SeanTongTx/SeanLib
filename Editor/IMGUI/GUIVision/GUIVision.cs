@@ -9,7 +9,8 @@ namespace EditorPlus
         public static class Vision
         {
             private static bool GlobleEnable = true;
-            static Stack<Color> backgrounds = new Stack<Color>();
+            static Stack<Color> background_Colors = new Stack<Color>();
+            static Stack<Color> contents_colors = new Stack<Color>();
             public static void GUIEnabled(bool enable)
             {
                 if (!GlobleEnable)
@@ -27,12 +28,21 @@ namespace EditorPlus
 
             public static void BeginBackGroundColor(Color color)
             {
-                backgrounds.Push(GUI.backgroundColor);
+                background_Colors.Push(GUI.backgroundColor);
                 GUI.backgroundColor = color;
             }
             public static void EndBackGroundColor()
             {
-                GUI.backgroundColor = backgrounds.Pop();
+                GUI.backgroundColor = background_Colors.Pop();
+            }
+            public static void BeginColor(Color color)
+            {
+                contents_colors.Push(GUI.color);
+                GUI.color = color;
+            }
+            public static void EndColor()
+            {
+                GUI.color = contents_colors.Pop();
             }
         }
     }

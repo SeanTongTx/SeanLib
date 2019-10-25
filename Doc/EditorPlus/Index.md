@@ -33,11 +33,3 @@ EditorGUI扩展组件，绘制等。
 
 工具集统一界面
 
-***
-## MergedTools 
-
-其他导入的插件
-
-### ReorderableList 
-
-(https://github.com/cfoulston/Unity-Reorderable-List.git)

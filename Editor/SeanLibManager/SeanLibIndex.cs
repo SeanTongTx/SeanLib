@@ -99,6 +99,7 @@ namespace EditorPlus
     {
         public bool enable = false;
         public SeanLibManager window;
+        public Rect position;
         public static class styles
         {
             public static GUIStyle ExtendArea;
