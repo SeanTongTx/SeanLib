@@ -71,13 +71,13 @@ namespace EditorPlus
             {
                 //Draw one editor
                 var editor = libIndex.GetEditor(indexState.selectedIDs[0]);
-                editor.position = position;
                 if (Event.current.type == EventType.Repaint)
                 {
                     EditorPrefs.SetInt("SeanLibIndex", indexState.selectedIDs[0]);
                 }
                 if (editor != null)
                 {
+                    editor.position = position;
                     if (editor.enable == false)
                     {
                         editor.OnEnable(this);
