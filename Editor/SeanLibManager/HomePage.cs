@@ -125,12 +125,21 @@ namespace EditorPlus
             }
             //CheckDocs();
             //ShowDoc
-            OnGUIUtility.Layout.Header("Packages");
-            ShowPackages();
-            OnGUIUtility.Layout.Header("Local");
-            ShowLocalPlugins();
-            OnGUIUtility.Layout.Header("Remote");
-            ShowRemotePlugins();
+            if (OnGUIUtility.Foldout("Packages("+ PackagePlugins.Plugins.Count+")", EditorStyles.boldLabel))
+            {
+                ShowPackages();
+                OnGUIUtility.Layout.Line();
+            }
+            if (OnGUIUtility.Foldout("Local("+LocalPlugins.Plugins.Count+")", EditorStyles.boldLabel))
+            {
+                ShowLocalPlugins();
+                OnGUIUtility.Layout.Line();
+            }
+            if(OnGUIUtility.Foldout("Remote("+remoteplugins.Plugins.Count+")", EditorStyles.boldLabel))
+            {
+                ShowRemotePlugins();
+                OnGUIUtility.Layout.Line();
+            }
             GUILayout.EndScrollView();
         }
 
@@ -303,7 +312,9 @@ namespace EditorPlus
                     if (EditorUtility.DisplayDialog(@"Import LocalPlugin", @"导入本地插件时，插件不会复制到项目内，而是存储在原本的目录中，通过绝对路径引用。
 因此不能将项目分享给其他用户！", "这是本地项目", "这是合作项目"))
                     {
-#if UNITY_2019_2_OR_NEWER
+#if UNITY_2020_1_OR_NEWER
+                        Client.Add("file:"+Directory.GetParent(package.URL));
+#elif UNITY_2019_2_OR_NEWER
                         var Internal_packageType = typeof(Client).Assembly.GetType("UnityEditor.PackageManager.UI.Package");
                         var addLocalMethod = Internal_packageType.GetMethod("AddFromLocalDisk", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                         addLocalMethod.Invoke(null, new object[] { package.URL });
@@ -329,7 +340,7 @@ namespace EditorPlus
         }
 #endregion
 
-#region RemotePlugin
+        #region RemotePlugin
 
         Vector2 remoteScroll;
         PluginList remoteplugins;

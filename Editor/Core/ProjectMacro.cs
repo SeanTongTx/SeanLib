@@ -12,7 +12,7 @@ public class ProjectMacro
         var Macro = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
         if (!Macro.Contains("EDITORPLUS"))
         {
-            Macro += "EDITORPLUS;";
+            Macro += ";EDITORPLUS;";
             PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, Macro);
         }
     }

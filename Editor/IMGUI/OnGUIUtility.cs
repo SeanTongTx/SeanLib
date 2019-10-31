@@ -649,7 +649,7 @@ namespace EditorPlus
             }
             public static void Line(float height=1)
             {
-                GUILayout.Box("", GUI.skin.box, GUILayout.Height(1), GUILayout.ExpandWidth(true));
+                GUILayout.Box("", GUI.skin.box, GUILayout.Height(height), GUILayout.ExpandWidth(true));
             }
             public static void IndentEnable()
             {

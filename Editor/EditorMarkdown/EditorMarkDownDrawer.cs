@@ -26,17 +26,18 @@ namespace EditorPlus
                 Title1 = new GUIStyle(OnGUIUtility.Fonts.RichText);
                 Title1.fontStyle = FontStyle.Bold;
                 Title1.fontSize = (int)EditorGUIUtility.singleLineHeight * 3;
-                Title1.normal.textColor = Color.white;
+                Title1.normal.textColor = EditorGUIUtility.isProSkin?Color.white: Color.black;
 
                 Title2 = new GUIStyle(OnGUIUtility.Fonts.RichText);
                 Title2.fontStyle = FontStyle.Bold;
                 Title2.fontSize = (int)EditorGUIUtility.singleLineHeight * 2;
-                Title2.normal.textColor = Color.white;
+                Title2.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                
 
                 Title3 = new GUIStyle(OnGUIUtility.Fonts.RichText);
                 Title3.fontStyle = FontStyle.Bold;
                 Title3.fontSize = (int)EditorGUIUtility.singleLineHeight * 1;
-                Title3.normal.textColor = Color.white;
+                Title3.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
 
                 Font = new GUIStyle(OnGUIUtility.Fonts.RichText);
 
@@ -75,7 +76,7 @@ namespace EditorPlus
             {
                 case KeyType.foldin:
                     data.doc.InFoldout = true;
-                    data.doc.CurrentFoldout = OnGUIUtility.Foldout( data.keyValue, MDStyles.Title3, GUILayout.ExpandWidth(true),GUILayout.Height(EditorGUIUtility.singleLineHeight));// OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
+                    data.doc.CurrentFoldout = OnGUIUtility.Foldout(data.keyValue, MDStyles.Title3, GUILayout.ExpandWidth(true),GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f));// OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
                     OnGUIUtility.Layout.IndentBegin(2);
                     break;
                 case KeyType.foldout:
