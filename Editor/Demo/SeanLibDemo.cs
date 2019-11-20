@@ -4,22 +4,73 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace EditorPlus
 {
     [CustomSeanLibEditor("EditorPlus/Demo")]
     public class SeanLibDemo : SeanLibEditor
     {
         OnGUIUtility.Search search = new OnGUIUtility.Search();
-        OnGUIUtility.OrderList orderList = new OnGUIUtility.OrderList();
         OnGUIUtility.Zone_Divide2Horizontal zone_Horizon = new OnGUIUtility.Zone_Divide2Horizontal();
         OnGUIUtility.Zone_Divide2Horizontal SubZone_Horizon = new OnGUIUtility.Zone_Divide2Horizontal();
         OnGUIUtility.Zone_Divide2Vertical SubZOne_Vertical = new OnGUIUtility.Zone_Divide2Vertical();
+        protected override string UXML => "../UIElementsDemo/UIElementsDemo";
+        protected override bool UseIMGUI => false;
         public override void OnEnable(SeanLibManager drawer)
         {
             base.OnEnable(drawer);
             zone_Horizon.Area0Size = 200;
             zone_Horizon.min = 60;
             zone_Horizon.Max = 800;
+            #region 列表Demo
+
+            // Create some list of data, here simply numbers in interval [1, 1000]
+            const int itemCount = 1000;
+            var items = new List<string>(itemCount);
+            for (int i = 1; i <= itemCount; i++)
+                items.Add(i.ToString());
+
+            // The "makeItem" function will be called as needed
+            // when the ListView needs more items to render
+            Func<VisualElement> makeItem = () => new Button();
+
+            // As the user scrolls through the list, the ListView object
+            // will recycle elements created by the "makeItem"
+            // and invoke the "bindItem" callback to associate
+            // the element with the matching data item (specified as an index in the list)
+            Action<VisualElement, int> bindItem = (e, i) =>
+            {
+                var btn = (e as Button);
+                btn.text = items[i];
+                btn.clickable.clicked += () => Debug.Log(i);
+            };
+            var listView = window.EditorContent.Q<ListView>();
+            listView.makeItem = makeItem;
+            listView.bindItem = bindItem;
+            listView.itemsSource = items;
+            listView.selectionType = SelectionType.Multiple;
+
+            // Callback invoked when the user double clicks an item
+            listView.onItemChosen += obj => Debug.Log(obj);
+
+            // Callback invoked when the user changes the selection inside the ListView
+            listView.onSelectionChanged += objects => Debug.Log(objects);
+            #endregion
+            #region button
+            // Action to perform when button is pressed.
+            // Toggles the text on all buttons in 'container'.
+            Action action = () =>
+            {
+                Debug.Log("Button click");
+            };
+
+            // Get a reference to the Button from UXML and assign it its action.
+            var uxmlButton = window.EditorContent.Q<Button>("the-uxml-button");
+            uxmlButton.clickable.clicked += () => action();
+            #endregion
+            var DemoIMGUI= window.EditorContent.Q<IMGUIContainer>("IMGUI");
+            DemoIMGUI.onGUIHandler = OnGUI;
         }
         List<string> strlist = new List<string>() { "asd", "ss", "zxz", "cvx1", "svzxc", "asd", "ss", "zxz", "cvx1", "svzxc", "asd", "ss", "zxz", "cvx1", "svzxc" };
 
@@ -55,9 +106,6 @@ namespace EditorPlus
             }
             Title("OnGUIUtility.Search");
             var s = search.OnToolbarGUI();
-
-            Title("OnGUIUtility.OrderList");
-            orderList.OnGui();
 
             Title("OnGUIUtility.Zone_Divide2Horizontal");
             zone_Horizon.OnGUILayout(window.Repaint, () =>
@@ -105,6 +153,7 @@ namespace EditorPlus
             GUILayout.Button("SeanLibEditor.styles.Title", SeanLibEditor.styles.Title, GUILayout.Width(200));
             GUILayout.EndScrollView();
         }
+
         public void Title(string title)
         {
             GUILayout.Space(EditorGUIUtility.singleLineHeight);

@@ -1,0 +1,66 @@
+﻿/***********面板**************/
+.split-pannel {
+    flex-grow: 1;
+    overflow: hidden;
+}
+/*设置 垂直分布*/
+.split-pannel--vertical {
+    flex-direction: column;
+}
+/*设置 水平分布*/
+.split-pannel--horizontal {
+    flex-direction: row;
+}
+
+/**********容器*************/
+.split-pannel__content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/************分割线***************/
+.split-pannel__dragline {
+    background-color: rgba(0, 0, 0, 0);
+    position: absolute;
+}
+
+.split-pannel__dragline--horizontal {
+    width: 10px;
+    left: -5px;
+    top: 0px;
+    bottom: 0px;
+    cursor: resize-horizontal;
+}
+
+.split-pannel__dragline--vertical {
+    height: 10px;
+    top: -5px;
+    left: 0px;
+    right: 0px;
+    cursor: resize-vertical;
+}
+
+/************碰撞检测框***************/
+.split-pannel__dragline-anchor {
+    position: absolute;
+    background-color: rgb(89, 89, 89);
+}
+
+.split-pannel__dragline-anchor:hover {
+    background-color: rgb(255, 255, 255);
+}
+
+.split-pannel__dragline-anchor--horizontal {
+    width: 1px;
+    top: 0px;
+    bottom: 0px;
+}
+
+.split-pannel__dragline-anchor--vertical {
+    height: 1px;
+    left: 0px;
+    right: 0px;
+}

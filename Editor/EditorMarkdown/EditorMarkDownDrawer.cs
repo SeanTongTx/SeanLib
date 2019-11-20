@@ -21,6 +21,7 @@ namespace EditorPlus
             public static GUIStyle Link;
             public static GUIStyle Font;
             public static GUIStyle Area;
+            public static GUIStyle Page;
             static MDStyles()
             {
                 Title1 = new GUIStyle(OnGUIUtility.Fonts.RichText);
@@ -38,6 +39,10 @@ namespace EditorPlus
                 Title3.fontStyle = FontStyle.Bold;
                 Title3.fontSize = (int)EditorGUIUtility.singleLineHeight * 1;
                 Title3.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+
+                Page = new GUIStyle(Title3);
+                Page.normal.textColor = EditorGUIUtility.isProSkin ? Color.cyan : Color.cyan/2;
+                Page.active.textColor = Color.white;
 
                 Font = new GUIStyle(OnGUIUtility.Fonts.RichText);
 
@@ -126,6 +131,11 @@ namespace EditorPlus
                         EditorGUIUtility.systemCopyBuffer = data.Data;
                         Application.OpenURL(data.Data);
                     }
+                    if(Event.current.type==EventType.Repaint)
+                    {
+                       var last= GUILayoutUtility.GetLastRect();
+                        EditorGUIUtility.AddCursorRect(last, MouseCursor.Link);
+                    }
                     break;
                 case KeyType.image:
                     if (data.texture)
@@ -155,13 +165,10 @@ namespace EditorPlus
                     OnGUIUtility.Layout.Line();
                     break;
                 case KeyType.page:
-                    Color c = GUI.color;
-                    GUI.color = Color.cyan;
-                    if (GUILayout.Button("▶" + data.Data, MDStyles.Title3, GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f)))
+                    if (GUILayout.Button("▶" + data.Data, MDStyles.Page, GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f)))
                     {
                         PageChange?.Invoke(data.Data);
                     }
-                    GUI.color = c;
                     break;
                 case KeyType.table:
                     GUILayout.BeginHorizontal();

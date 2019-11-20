@@ -126,7 +126,7 @@ public abstract class InternalInspector<T>: BaseInspector<T> where T : UnityEngi
     }
     protected void OnDisable()
     {
-        if (m_ObjectInspector)
+        if (m_ObjectInspector&&!m_ObjectInspector.Equals(null))
         {
             DestroyImmediate(m_ObjectInspector);
         }

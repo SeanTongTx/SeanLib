@@ -8,7 +8,7 @@ namespace EditorPlus
 {
     public class ReferenceHierarchy : EditorWindow
     {
-        [MenuItem("Window/ReferenceWindow &#2")]
+        [MenuItem("Window/SeanLib/ReferenceWindow &#2")]
         public static void ShowWindow()
         {
             ReferenceHierarchy w = GetWindow<ReferenceHierarchy>();

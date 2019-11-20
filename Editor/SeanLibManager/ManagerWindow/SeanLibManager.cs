@@ -5,32 +5,34 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace EditorPlus
 {
     public class SeanLibManager : EditorWindow
     {
-
-        [MenuItem("Window/SeanLib &#1")]
+        [MenuItem("Window/SeanLib/Manager &#1")]
         public static void ShowWindow()
         {
             SeanLibManager w = GetWindow<SeanLibManager>();
+            w.titleContent = new GUIContent("SeanLibManager");
             w.Show();
         }
-        static class styles
-        {
-            public static GUIStyle Area;
-            static styles()
-            {
-                styles.Area = new GUIStyle("RL Background");
-            }
-        }
-
-        #region Layout
-        public OnGUIUtility.Zone_Divide2Horizontal RootLayout = new OnGUIUtility.Zone_Divide2Horizontal();
-        #endregion
         [SerializeField]
         TreeViewState indexState;
         SeanLibIndex libIndex;
+
+        /// <summary>
+        /// 编辑器目录
+        /// </summary>
+        public VisualElement EditorIndex;
+        internal IMGUIContainer EditorIndexContent_IMGUI;
+
+        /// <summary>
+        /// 编辑器内容
+        /// </summary>
+        public VisualElement EditorContent;
+        private SeanLibEditor editor;
         private void OnEnable()
         {
             if (indexState == null)
@@ -40,7 +42,19 @@ namespace EditorPlus
             libIndex = new SeanLibIndex(indexState);
             libIndex.RefreshTreeData(this);
             libIndex.SetSelection(new List<int>() { EditorPrefs.GetInt("SeanLibIndex", 1) });
-            this.wantsMouseMove = true;
+
+            VisualElement root = rootVisualElement;
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(this.GetType(), "../SeanLibManagerWindow.uxml"));
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(this.GetType(), "../SeanLibManagerWindow.uss"));
+            root.styleSheets.Add(styleSheet);
+            visualTree.CloneTree(root);
+
+            //目录
+            EditorIndex = root.Q<VisualElement>("EditorIndex");
+            EditorIndexContent_IMGUI = EditorIndex.Q<IMGUIContainer>("EditorIndexContent_IMGUI");
+            EditorIndexContent_IMGUI.onGUIHandler = () => { libIndex.OnGUI(EditorIndexContent_IMGUI.contentRect); };
+            //内容
+            EditorContent = root.Q<VisualElement>("EditorContent");
         }
         Vector2 v;
         private void OnGUI()
@@ -48,48 +62,49 @@ namespace EditorPlus
             if (EditorApplication.isCompiling)
             {
                 ShowNotification(new GUIContent("Compiling..."));
+                rootVisualElement.SetEnabled(false);
                 return;
             }
-            RootLayout.OnGUI(new Rect(Vector2.zero, position.size), Repaint, DrawLibIndex, DrawEditor);
-        }
-        private void OnDisable()
-        {
-            foreach (var item in libIndex.editors)
+            else
             {
-                if (item.enable)
-                    item.OnDisable();
+                rootVisualElement.SetEnabled(true);
+                CheckEditorChange();
             }
         }
-
-        protected virtual void DrawLibIndex(Rect position)
-        {
-            libIndex.OnGUI(RootLayout.Area0);
-        }
-        protected virtual void DrawEditor(Rect position)
+        private void CheckEditorChange()
         {
             if (indexState.selectedIDs.Count != 0)
             {
                 //Draw one editor
-                var editor = libIndex.GetEditor(indexState.selectedIDs[0]);
-                if (Event.current.type == EventType.Repaint)
+                var selectEditor = libIndex.GetEditor(indexState.selectedIDs[0]);
+                if (editor == selectEditor)
                 {
-                    EditorPrefs.SetInt("SeanLibIndex", indexState.selectedIDs[0]);
-                }
-                if (editor != null)
-                {
-                    editor.position = position;
-                    if (editor.enable == false)
-                    {
-                        editor.OnEnable(this);
-                    }
-                    editor.OnGUI();
+                    return;
                 }
                 else
                 {
-                    GUILayout.Label("No Drawable editor");
+                    if (editor != null)
+                    {
+                        editor.OnDisable();
+                    }
+                    editor = selectEditor;
+                    EditorPrefs.SetInt("SeanLibIndex", indexState.selectedIDs[0]);
+                    if (selectEditor != null)
+                    {
+                        selectEditor.position = EditorContent.contentRect;
+                        selectEditor.OnEnable(this);
+                    }
                 }
             }
         }
+        private void OnDisable()
+        {
+            if(editor!=null)
+            {
+                editor.OnDisable();
+            }
+        }
+
         public void SelectIndex(int id)
         {
             indexState.selectedIDs.Clear();

@@ -1,8 +1,10 @@
 ﻿using ServiceTools.Reflect;
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EditorPlus
 {
@@ -95,11 +97,18 @@ namespace EditorPlus
     {
         public SeanLibEditor editor;
     }
-    public class SeanLibEditor
+    public abstract class SeanLibEditor
     {
-        public bool enable = false;
         public SeanLibManager window;
+        /// <summary>
+        /// window postion
+        /// </summary>
         public Rect position;
+        public IMGUIContainer EditorContent_IMGUI;
+        protected virtual string UXML => string.Empty;
+
+        protected StyleSheet editorContent_styles;
+        protected virtual bool UseIMGUI => true;
         public static class styles
         {
             public static GUIStyle ExtendArea;
@@ -114,20 +123,48 @@ namespace EditorPlus
                 Box = new GUIStyle("OL box NoExpand");
             }
         }
-        protected virtual void SetupLayout()
-        {
-        }
         public virtual void OnEnable(SeanLibManager drawer)
         {
             window = drawer;
-            enable = true;
+            if(UseIMGUI) EnableIMGUI();
+            else EnableUIElements();
+           
+        }
+        public virtual void EnableUIElements()
+        {
+            if (!string.IsNullOrEmpty(UXML))
+            {
+                var editorContent = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(this.GetType(),UXML+".uxml"));
+                editorContent_styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(this.GetType(), UXML+".uss"));
+                window.EditorContent.styleSheets.Add(editorContent_styles);
+                editorContent.CloneTree(window.EditorContent);
+            }
+        }
+        public virtual void EnableIMGUI()
+        {
+            EditorContent_IMGUI = new IMGUIContainer(OnGUI);
+            EditorContent_IMGUI.name = "EditorContent_IMGUI";
+            EditorContent_IMGUI.style.flexGrow = 1;
+            window.EditorContent.Add(EditorContent_IMGUI);
         }
         public virtual void OnGUI()
         {
-            SetupLayout();
         }
         public virtual void OnDisable()
         {
+            window.EditorContent.Clear();
+            if (UseIMGUI)
+            {
+
+            }
+            else
+            {
+                if(editorContent_styles)
+                {
+                    window.EditorContent.styleSheets.Remove(editorContent_styles);
+                    editorContent_styles = null;
+                }
+            }
             window = null;
         }
     }

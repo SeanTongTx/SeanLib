@@ -1,40 +1,36 @@
-/*对所有的Label组件生效*/
-Label {
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: rgb(68, 138, 255);
-}
-.Root
+Label:hover
 {
-	flex:auto;
-	flex-direction: column;
+	color:rgb(255,255,255);
 }
-/* Container类生效*/
-.Container
+/*split pannel*/
+/*默认 分割面板是弹性100%填充父节点*/
+SplitPannel
 {
-	/*margin:5px;
-	border:3px;
-	padding:2px;*/
-	flex-direction:row;/*弹性布局 行排列*/
-	/*flex-wrap:wrap;自动换行*/
-	flex:1;
+	flex-grow:1;
 }
-.Container>.item
+/*在scrollView中的必须fixed大小*/
+.child-split-pannel
 {
-	flex:1;
+	height:300;
 }
-.Splitter
+.child-split-pannel_1
 {
-	width:1px;
-	background-color:#575757;
+	min-height:100;
+	max-height:200;
+	flex-grow:1;
+	background-color:#555
 }
-.Splitter>#SplitterDragBar
+.child-split-pannel_2
 {
-	width:10px;
-	flex:1;
-	align-self:center;/*相对父节点 中心对齐*/
+	background-color:#222
 }
-.Bottom
-{
-	flex-basis:100px;
+
+/*List */
+.the-uxml-listview {
+    /* Provide the list view with an explict height for every row
+    so it can calculate how many items to actually display */
+    --unity-item-height: 16;
+	min-width:100;
+	max-width:300;
+	flex-grow:1;
 }

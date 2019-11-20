@@ -85,7 +85,6 @@ namespace EditorPlus
         }
         public override void OnGUI()
         {
-            SetupLayout();
             GUIToolBar();
             HomeScroll = GUILayout.BeginScrollView(HomeScroll);
             ShowIndexDoc();

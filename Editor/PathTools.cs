@@ -52,7 +52,7 @@ public static class PathTools
         foreach (var item in ans)
         {
             var assetPath = AssetDatabase.GUIDToAssetPath(item);
-            if (Path.GetFileNameWithoutExtension(assetPath)== type.Name)
+            if (Path.GetFileNameWithoutExtension(assetPath) == type.Name)
             {
                 return assetPath;
             }
@@ -74,7 +74,7 @@ public static class PathTools
             FilePath = FilePath.Replace("/", @"\");
             return FilePath;
 #else
-        return FilePath;
+            return FilePath;
 #endif
         }
         return assetpath;
@@ -96,14 +96,14 @@ public static class PathTools
             AssetPath = AssetPath.Replace(@"\", "/");
             return AssetPath;
 #else
-        return AssetPath;
+            return AssetPath;
 #endif
         }
         return filepath;
     }
     public static bool IsAssetPath(string path)
     {
-        return path.StartsWith("Assets")||path.StartsWith("Packages");
+        return path.StartsWith("Assets") || path.StartsWith("Packages");
     }
     /// <summary>
     /// 获得资源在Resource中的路径
@@ -124,8 +124,17 @@ public static class PathTools
         }
         return Path.GetFileNameWithoutExtension(assetPath.Substring(start + 10, path.Length - start - 10));
     }
-/*
-    public static List<string> GetSubAssetsPath(string AssetPathDir)
+    public static string GetSelectAssetDir()
     {
-    }*/
+        var selections = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
+        foreach (var item in selections)
+        {
+           var assetPath= AssetDatabase.GetAssetPath(item);
+            if (Path.GetExtension(assetPath) ==string.Empty)
+            {
+                return assetPath;
+            }
+        }
+        return string.Empty;
+    }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EditorPlus
 {
@@ -17,6 +18,7 @@ namespace EditorPlus
         public Stack<string> DocPages = new Stack<string>();
         public string CurrentDocName;
 
+        #region IMGUI
         private OnGUIUtility.Search search = new OnGUIUtility.Search();
         public OnGUIUtility.Search Search
         {
@@ -25,29 +27,49 @@ namespace EditorPlus
                 return SearchField ? search : null;
             }
         }
-
-        public override void OnEnable(SeanLibManager drawer)
+        public void ToolBar()
         {
-            base.OnEnable(drawer);
-            var docAssetDir = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
-            var subAssets = AssetDatabase.FindAssets("", new string[] { docAssetDir });
-            List<string> docPath = new List<string>();
-            foreach (var item in subAssets)
+            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+            if (DocPages.Count > 0 && GUILayout.Button("<", EditorStyles.toolbarButton, GUILayout.Width(20)))
             {
-                var assetPath = AssetDatabase.GUIDToAssetPath(item);
-                if (Path.GetExtension(assetPath) == ".md")
+                CurrentDocName = DocPages.Pop();
+            }
+            GUILayout.Label(Title, EditorStyles.toolbarButton, GUILayout.ExpandWidth(true));
+            if (SearchField)
+            {
+                Search.OnToolbarGUI(GUILayout.MaxWidth(160));
+            }
+            if (GUILayout.Button("H", EditorStyles.toolbarButton, GUILayout.Width(20)))
+            {
+                changePageWithDocName("Index");
+            }
+            if (GUILayout.Button("E", EditorStyles.toolbarButton, GUILayout.Width(20)))
+            {
+                var doc = Docs[CurrentDocName];
+                var index = CurrentDocName.LastIndexOf("/") + 1;
+                var assetPath = doc.AssetDir + "/" + CurrentDocName.Substring(index, CurrentDocName.Length - index) + ".md";
+                // assetPath = "Assets" + assetPath.Replace(Application.dataPath, "");
+                var obj = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
+                AssetDatabase.OpenAsset(obj);
+                //Process.Start();
+            }
+            if (Docs.Count > 1)
+            {
+                if (GUILayout.Button(CurrentDocName, EditorStyles.toolbarPopup, GUILayout.Width(100)))
                 {
-                    docPath.Add(assetPath);
+                    GenericMenu menu = new GenericMenu();
+                    foreach (var kv in Docs)
+                    {
+                        menu.AddItem(new GUIContent(kv.Key), false, (page) =>
+                        {
+                            changePageWithDocName(page as string);
+                        }, kv.Key);
+                    }
+                    //menu.AddSeparator("");
+                    menu.ShowAsContext();
                 }
             }
-            foreach (var aPath in docPath)
-            {
-                var rawDoc = AssetDatabase.LoadAssetAtPath(aPath, typeof(TextAsset)) as TextAsset;
-                var docName = aPath.Replace(docAssetDir + "/", "").Replace(".md", "");
-
-                var doc = new MarkDownDoc(aPath.Substring(0, aPath.LastIndexOf('/')), rawDoc.text);
-                Docs[docName] = doc;
-            }
+            GUILayout.EndHorizontal();
         }
         Vector2 v;
         public override void OnGUI()
@@ -104,49 +126,39 @@ namespace EditorPlus
                 OnGUIUtility.ScriptField("Editor Script", this.GetType());
             }
         }
-        public void ToolBar()
+        #endregion
+        protected override string UXML => "../EditorMDDoc/EditorMDDoc";
+        public override void OnEnable(SeanLibManager drawer)
         {
-            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-            if (DocPages.Count > 0 && GUILayout.Button("<", EditorStyles.toolbarButton, GUILayout.Width(20)))
+            base.OnEnable(drawer);
+            var docAssetDir = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
+            var subAssets = AssetDatabase.FindAssets("", new string[] { docAssetDir });
+            List<string> docPath = new List<string>();
+            foreach (var item in subAssets)
             {
-                CurrentDocName = DocPages.Pop();
-            }
-            GUILayout.Label(Title, EditorStyles.toolbarButton, GUILayout.ExpandWidth(true));
-            if (SearchField)
-            {
-                Search.OnToolbarGUI(GUILayout.MaxWidth(160));
-            }
-            if (GUILayout.Button("H", EditorStyles.toolbarButton, GUILayout.Width(20)))
-            {
-                changePageWithDocName("Index");
-            }
-            if (GUILayout.Button("E", EditorStyles.toolbarButton, GUILayout.Width(20)))
-            {
-                var doc = Docs[CurrentDocName];
-                var index = CurrentDocName.LastIndexOf("/")+1;
-                var assetPath = doc.AssetDir + "/" + CurrentDocName.Substring(index, CurrentDocName.Length- index) + ".md";
-                // assetPath = "Assets" + assetPath.Replace(Application.dataPath, "");
-                var obj = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
-                AssetDatabase.OpenAsset(obj);
-                //Process.Start();
-            }
-            if (Docs.Count > 1)
-            {
-                if (GUILayout.Button(CurrentDocName, EditorStyles.toolbarPopup, GUILayout.Width(100)))
+                var assetPath = AssetDatabase.GUIDToAssetPath(item);
+                if (Path.GetExtension(assetPath) == ".md")
                 {
-                    GenericMenu menu = new GenericMenu();
-                    foreach (var kv in Docs)
-                    {
-                        menu.AddItem(new GUIContent(kv.Key), false, (page) =>
-                        {
-                            changePageWithDocName(page as string);
-                        }, kv.Key);
-                    }
-                    //menu.AddSeparator("");
-                    menu.ShowAsContext();
+                    docPath.Add(assetPath);
                 }
             }
-            GUILayout.EndHorizontal();
+            foreach (var aPath in docPath)
+            {
+                var rawDoc = AssetDatabase.LoadAssetAtPath(aPath, typeof(TextAsset)) as TextAsset;
+                var docName = aPath.Replace(docAssetDir + "/", "").Replace(".md", "");
+                var doc = new MarkDownDoc(aPath.Substring(0, aPath.LastIndexOf('/')), rawDoc.text);
+                Docs[docName] = doc;
+            }
+        }
+        public override void EnableUIElements()
+        {
+            if (!string.IsNullOrEmpty(UXML))
+            {
+                var editorContent = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(typeof(EditorMarkDownWindow), UXML + ".uxml"));
+                editorContent_styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(typeof(EditorMarkDownWindow), UXML + ".uss"));
+                window.EditorContent.styleSheets.Add(editorContent_styles);
+                editorContent.CloneTree(window.EditorContent);
+            }
         }
         private void changePageWithDocName(string DocName)
         {

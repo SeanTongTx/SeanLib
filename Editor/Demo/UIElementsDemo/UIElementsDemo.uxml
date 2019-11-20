@@ -1,32 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<engine:UXML
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:engine="UnityEngine.UIElements"
-    xmlns:editor="UnityEditor.UIElements"
-
-xsi:noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd"
-xsi:schemaLocation="
-                        UnityEngine.UIElements ../../../../../../UIElementsSchema/UnityEngine.UIElements.xsd
-                        UnityEditor.UIElements ../../../../../../UIElementsSchema/UnityEditor.UIElements.xsd
-                        UnityEditor.PackageManager.UI ../../../../../../UIElementsSchema/UnityEditor.PackageManager.UI.xsd
-"
->
-  <engine:VisualElement class="Container">
-    <engine:VisualElement name="Item0" class="item">
-      <engine:Label text="Item0"/>
-      <engine:Button text="http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html?utm_source=tuicool"/>
-    </engine:VisualElement>
-    <Splitter xmlns="UIElements" name="Splitter" class="Splitter" Horizon="true" Target="Item0"/>
-    <engine:VisualElement name="Item1" class="item">
-      <engine:Label text="Item1"/>
-    </engine:VisualElement>
-    <engine:VisualElement name="Item2" class="item">
-      <engine:Label text="Item1"/>
-    </engine:VisualElement>
-    <engine:VisualElement name="Item3" class="item">
-      <engine:Label text="Item1"/>
-    </engine:VisualElement>
-  </engine:VisualElement>
-  <engine:IMGUIContainer name="BottomIMGUI" class="Bottom">
-  </engine:IMGUIContainer>
-</engine:UXML>
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:uib="Unity.UI.Builder">
+  <!--分割面板 分割成2个水平面板-->
+  <SplitPannel index="0" init-size="125" orientation="horizontal">
+    <!--列表Demo-->
+    <ListView class="the-uxml-listview" />
+    <ScrollView>
+      <Button text="Button" />
+      <TextField picking-mode="Ignore" label="Text Field" value="filler text" text="filler text" />
+      <Label text="Label" />
+      <Toggle label="Toggle" />
+      <!--嵌套在scrollview中的分割面板 必须使用固定大小 默认是弹性大小的-->
+      <SplitPannel index="0" init-size="150" orientation="vertical" class="child-split-pannel">
+        <VisualElement name="pannel_fixed" text="Label" class="child-split-pannel_1">
+          <Label text="pannel_1" />
+          <Button text="UXML Button" name="the-uxml-button" />
+        </VisualElement>
+        <VisualElement  name="pannel_flex" text="Label" class="child-split-pannel_2">
+          <Label text="pannel_2" />
+        </VisualElement>
+      </SplitPannel>
+      <Toggle label="Toggle" />
+      <IMGUIContainer name="IMGUI">
+        
+      </IMGUIContainer>
+    </ScrollView>
+  </SplitPannel>
+  
+</UXML>

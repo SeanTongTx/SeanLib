@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace SeanLib.Core
 {
@@ -18,13 +19,13 @@ namespace SeanLib.Core
 
         public Func<T,T,bool> SelectFunc; 
         public int Capacity = 100;
+
         public ObjectPool(Func<T,T> createFunc, Action<T> reset, Action<T> clear=null)
         {
             CreateFunc = createFunc;
             ResetAction = reset;
             ClearAction = clear;
         }
-
         public List<T> GetUsingObjects()
         {
             List<T> ret = new List<T>();

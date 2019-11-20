@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <uie:Toolbar style="min-height: 18px; display: flex; visibility: visible; overflow: visible;">
+      <uie:ToolbarButton text="◀" style=" font-size: 16px;"/>
+      <ui:Label text="EditorMD Doc" style="flex-grow: 1; -unity-text-align: lower-center;" />
+      <uie:ToolbarPopupSearchField style=" max-width: 200px; min-width: 100px;"/>
+      <uie:ToolbarButton text="H" style="-unity-text-align: lower-center;"/>
+      <uie:ToolbarButton text="E" style="-unity-text-align: lower-center;"/>
+      <uie:ToolbarMenu text="DocIndex" style="-unity-text-align: lower-center;"/>
+    </uie:Toolbar>
+    <ui:VisualElement style="flex-grow: 1; height: 547px; visibility: hidden;">
+    </ui:VisualElement>
+    <ui:IMGUIContainer name="ScriptPannel" style="height: 25px;">
+    </ui:IMGUIContainer>
+</ui:UXML>
