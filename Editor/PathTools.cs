@@ -69,7 +69,7 @@ public static class PathTools
     {
         if (IsAssetPath(assetpath))
         {
-            var FilePath = Application.dataPath + "/" + assetpath.Replace("Assets/", "");
+            var FilePath = Directory.GetParent(assetpath).FullName + @"\" + Path.GetFileName(assetpath);
 #if UNITY_STANDALONE_WIN
             FilePath = FilePath.Replace("/", @"\");
             return FilePath;

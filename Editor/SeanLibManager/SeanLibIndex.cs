@@ -105,6 +105,7 @@ namespace EditorPlus
         /// </summary>
         public Rect position;
         public IMGUIContainer EditorContent_IMGUI;
+        public VisualElement EditorContent_Elements => window.EditorContent;
         protected virtual string UXML => string.Empty;
 
         protected StyleSheet editorContent_styles;
