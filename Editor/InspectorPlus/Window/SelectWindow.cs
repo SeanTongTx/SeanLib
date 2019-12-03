@@ -1,4 +1,5 @@
 ﻿using SeanLib.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -9,36 +10,65 @@ namespace EditorPlus
 {
     public class SelectWindow<T> : PopupWindowContent
     {
-        protected OnGUIUtility.Search searchField = new OnGUIUtility.Search();
+        public struct CallBack
+        {
+            public Action<T, int> OnSelected;
+            public Func<Vector2> WindowSize;
+            public Action<T, int> DrawSelection;
+            public void Merge(CallBack option)
+            {
+                OnSelected = option.OnSelected == null ? OnSelected : option.OnSelected;
+                WindowSize = option.WindowSize == null ? WindowSize : option.WindowSize;
+                DrawSelection = option.DrawSelection == null ? DrawSelection : option.DrawSelection;
+            }
+        }
+        #region Default
         private static SelectWindow<T> defaultContent = new SelectWindow<T>();
+        private static CallBack defaultCallback = new CallBack() { WindowSize = defaultSize, DrawSelection=DrawSelection};
+        public static void DrawSelection(T item,int index)
+        {
+            if (item == null)
+            {
+                if (GUILayout.Button("null", Styles.Selection))
+                {
+                    instance.Select(default(T), index);
+                    instance.editorWindow.Close();
+                    return;
+                }
+            }
+            else if (instance.searchField.GeneralValid(item.ToString()))
+            {
+                if (GUILayout.Button(item.ToString(), Styles.Selection))
+                {
+                    instance.Select(item, index);
+                    instance.editorWindow.Close();
+                    return;
+                }
+            }
+        }
+        public static Vector2 defaultSize() { return new Vector2(200, 300); }
+        #endregion
+        #region API
         public static SelectWindow<T> instance;
         public static void Show(List<T> list, string controlId)
         {
-            Show(list, controlId, new Vector2(0, 0));
+            Show(list, controlId,new CallBack());
         }
-        public static void Show(List<T> list, string controlId,Vector2 size)
+        public static void Show(List<T> list, string controlId, CallBack callback)
         {
             instance = defaultContent;
-            instance.ControlId = controlId;
-            instance.List = list;
-            instance.size = size;
+            instance.OnEnable(list, controlId, callback);
             try
             {
-                PopupWindow.Show(new Rect(Event.current.mousePosition.DeltaX(-100),Vector2.zero), instance);
+                PopupWindow.Show(new Rect(Event.current.mousePosition.DeltaX(-100), Vector2.zero), instance);
             }
             catch
             {
                 //  EditorGUIUtility.ExitGUI();
             }
         }
-        public override Vector2 GetWindowSize()
-        {
-            if(size!=Vector2.zero)
-            {
-                return size;
-            }
-            return base.GetWindowSize();
-        }
+        #endregion
+        #region IMGUI
         protected static bool canPick;
         public static bool CanPick(string controlId)
         {
@@ -59,12 +89,16 @@ namespace EditorPlus
             canPick = false;
             return i;
         }
+        #endregion
 
+        protected OnGUIUtility.Search searchField = new OnGUIUtility.Search();
         public string ControlId;
         public List<T> List;
+
         public T Selected;
         public int SelectedIndex;
-        public Vector2 size;
+
+        protected CallBack callback;
         protected Vector2 v;
         protected static class Styles
         {
@@ -73,6 +107,22 @@ namespace EditorPlus
             {
                 Selection = new GUIStyle("OL Title");
             }
+        }
+        protected virtual void OnEnable(List<T> list, string controlId, CallBack optional)
+        {
+            CallBack instanceCallBack = defaultCallback;
+            instanceCallBack.Merge(optional);
+            instance.ControlId = controlId;
+            instance.List = list;
+            instance.callback= instanceCallBack;
+        }
+        protected virtual void Select(T t, int index)
+        {
+            instance.Selected = t;
+            instance.SelectedIndex = index;
+            instance.callback.OnSelected?.Invoke(t, index);
+            instance.callback.OnSelected = null;
+            canPick = true;
         }
         public override void OnGUI(Rect rect)
         {
@@ -83,28 +133,7 @@ namespace EditorPlus
                 for (int i = 0; i < List.Count; i++)
                 {
                     var item = List[i];
-                    if (item == null)
-                    {
-                        if (GUILayout.Button("null", Styles.Selection))
-                        {
-                            instance.Selected = default(T);
-                            instance.SelectedIndex = i;
-                            canPick = true;
-                            this.editorWindow.Close();
-                            return;
-                        }
-                    }
-                    else if (searchField.GeneralValid(item.ToString()))
-                    {
-                        if (GUILayout.Button(item.ToString(), Styles.Selection))
-                        {
-                            instance.Selected = item;
-                            instance.SelectedIndex = i;
-                            canPick = true;
-                            this.editorWindow.Close();
-                            return;
-                        }
-                    }
+                    callback.DrawSelection(item, i);
                 }
                 EditorGUILayout.EndScrollView();
             }
@@ -117,6 +146,10 @@ namespace EditorPlus
         public override void OnClose()
         {
             base.OnClose();
+        }
+        public override Vector2 GetWindowSize()
+        {
+            return callback.WindowSize();
         }
     }
 }

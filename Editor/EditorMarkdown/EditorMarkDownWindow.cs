@@ -150,7 +150,7 @@ namespace EditorPlus
                 Docs[docName] = doc;
             }
         }
-        public override void EnableUIElements()
+        public override void SetupUIElements()
         {
             if (!string.IsNullOrEmpty(UXML))
             {

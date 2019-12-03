@@ -127,11 +127,11 @@ namespace EditorPlus
         public virtual void OnEnable(SeanLibManager drawer)
         {
             window = drawer;
-            if(UseIMGUI) EnableIMGUI();
-            else EnableUIElements();
+            if(UseIMGUI) SetupIMGUI();
+            else SetupUIElements();
            
         }
-        public virtual void EnableUIElements()
+        public virtual void SetupUIElements()
         {
             if (!string.IsNullOrEmpty(UXML))
             {
@@ -141,7 +141,7 @@ namespace EditorPlus
                 editorContent.CloneTree(window.EditorContent);
             }
         }
-        public virtual void EnableIMGUI()
+        public virtual void SetupIMGUI()
         {
             EditorContent_IMGUI = new IMGUIContainer(OnGUI);
             EditorContent_IMGUI.name = "EditorContent_IMGUI";
