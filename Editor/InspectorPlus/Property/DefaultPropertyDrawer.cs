@@ -39,6 +39,10 @@ namespace EditorPlus
                     }
                 }
             }
+            if(TryGetAttibute<InspectorPlus.HideInInspector>()!=null)
+            {
+                return;
+            }
             var read = TryGetAttibute<InspectorPlus.ReadOnly>();
             if (read != null)
             {
@@ -85,6 +89,10 @@ namespace EditorPlus
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            if (TryGetAttibute<InspectorPlus.HideInInspector>() != null)
+            {
+                return 0;
+            }
             return EditorGUI.GetPropertyHeight(property, label);
         }
 

@@ -13,6 +13,64 @@ namespace EditorPlus
 {
     public static partial class OnGUIUtility
     {
+        public static class Components
+        {
+            public static GenericMenu Menu()
+            {
+                return new GenericMenu();
+            }
+            public class FadePool
+            {
+                private Dictionary<string, FadeGroup> Groups = new Dictionary<string, FadeGroup>();
+                public FadeGroup Get(string Title, UnityAction Repaint, bool defaultEnable = false, params GUILayoutOption[] options)
+                {
+                    FadeGroup group = null;
+                    if(!Groups.TryGetValue(Title,out group))
+                    {
+                        group = new FadeGroup();
+                        group.OnEnable(Repaint, defaultEnable);
+                        Groups[Title] = group;
+                    }
+                    return group;
+                }
+                public void OnDisable(UnityAction Repaint)
+                {
+                    var en = Groups.GetEnumerator();
+                    while(en.MoveNext())
+                    {
+                        en.Current.Value.OnDisable(Repaint);
+                    }
+                    Groups.Clear();
+                }
+            }
+            public class ComponentPool<T> where T:class, new()
+            {
+                private Dictionary<string, T> coms = new Dictionary<string, T>();
+                public T Get(string Key,out bool isNew)
+                {
+                    T com = null;
+                    isNew = false;
+                    if (!coms.TryGetValue(Key, out com))
+                    {
+                        com = new T();
+                        coms[Key] = com;
+                        isNew = true;
+                    }
+                    return com;
+                }
+                public void Clear(Action<T> onClear)
+                {
+                    var en = coms.GetEnumerator();
+                    while (en.MoveNext())
+                    {
+                        onClear(en.Current.Value);
+                    }
+                    coms.Clear();
+                }
+            }
+
+
+        }
         public static class Grid
         {
             public class GridContainer<T>
@@ -735,5 +793,7 @@ namespace EditorPlus
                 }
             }
         }
+
+
     }
 }

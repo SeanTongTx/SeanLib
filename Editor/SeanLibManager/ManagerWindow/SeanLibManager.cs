@@ -9,19 +9,18 @@ using UnityEngine.UIElements;
 
 namespace EditorPlus
 {
-    public class SeanLibManager : EditorWindow
+    public abstract class SeanLibManager : EditorWindow
     {
-        [MenuItem("Window/SeanLib/Manager &#1")]
-        public static void ShowWindow()
-        {
-            SeanLibManager w = GetWindow<SeanLibManager>();
-            w.titleContent = new GUIContent("SeanLibManager");
-            w.Show();
-        }
         [SerializeField]
-        TreeViewState indexState;
-        SeanLibIndex libIndex;
-
+        protected TreeViewState indexState;
+        protected SeanLibIndex libIndex;
+        protected virtual string IndexKey => "SeanLibIndex";
+        protected virtual ElementsFileAsset FileAsset => new ElementsFileAsset()
+        {
+             BaseType= typeof(SeanLibManager),
+             UXML= "../SeanLibManagerWindow.uxml",
+             USS= "../SeanLibManagerWindow.uss"
+        };
         /// <summary>
         /// 编辑器目录
         /// </summary>
@@ -32,8 +31,8 @@ namespace EditorPlus
         /// 编辑器内容
         /// </summary>
         public VisualElement EditorContent;
-        private SeanLibEditor editor;
-        private void OnEnable()
+        public SeanLibEditor CurrentEditor { get; private set; }
+        protected virtual void OnEnable()
         {
             if (indexState == null)
             {
@@ -41,11 +40,12 @@ namespace EditorPlus
             }
             libIndex = new SeanLibIndex(indexState);
             libIndex.RefreshTreeData(this);
-            libIndex.SetSelection(new List<int>() { EditorPrefs.GetInt("SeanLibIndex", 1) });
+            libIndex.SetSelection(new List<int>() { EditorPrefs.GetInt(IndexKey, 1) });
 
             VisualElement root = rootVisualElement;
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(this.GetType(), "../SeanLibManagerWindow.uxml"));
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(this.GetType(), "../SeanLibManagerWindow.uss"));
+            
+            var visualTree = AssetDBHelper.LoadAsset<VisualTreeAsset>(FileAsset.BaseType, FileAsset.UXML);
+            var styleSheet = AssetDBHelper.LoadAsset<StyleSheet>(FileAsset.BaseType, FileAsset.USS);
             root.styleSheets.Add(styleSheet);
             visualTree.CloneTree(root);
 
@@ -77,18 +77,18 @@ namespace EditorPlus
             {
                 //Draw one editor
                 var selectEditor = libIndex.GetEditor(indexState.selectedIDs[0]);
-                if (editor == selectEditor)
+                if (CurrentEditor == selectEditor)
                 {
                     return;
                 }
                 else
                 {
-                    if (editor != null)
+                    if (CurrentEditor != null)
                     {
-                        editor.OnDisable();
+                        CurrentEditor.OnDisable();
                     }
-                    editor = selectEditor;
-                    EditorPrefs.SetInt("SeanLibIndex", indexState.selectedIDs[0]);
+                    CurrentEditor = selectEditor;
+                    EditorPrefs.SetInt(IndexKey, indexState.selectedIDs[0]);
                     if (selectEditor != null)
                     {
                         selectEditor.position = EditorContent.contentRect;
@@ -99,9 +99,9 @@ namespace EditorPlus
         }
         private void OnDisable()
         {
-            if(editor!=null)
+            if(CurrentEditor!=null)
             {
-                editor.OnDisable();
+                CurrentEditor.OnDisable();
             }
         }
 

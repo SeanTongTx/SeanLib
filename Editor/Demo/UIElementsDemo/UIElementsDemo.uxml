@@ -11,11 +11,11 @@
       <!--嵌套在scrollview中的分割面板 必须使用固定大小 默认是弹性大小的-->
       <SplitPannel index="0" init-size="150" orientation="vertical" class="child-split-pannel">
         <VisualElement name="pannel_fixed" text="Label" class="child-split-pannel_1">
-          <Label text="pannel_1" />
+          <Label text="pannel_1"/>
           <Button text="UXML Button" name="the-uxml-button" />
         </VisualElement>
         <VisualElement  name="pannel_flex" text="Label" class="child-split-pannel_2">
-          <Label text="pannel_2" />
+          <Label text="pannel_2"/>
         </VisualElement>
       </SplitPannel>
       <Toggle label="Toggle" />

@@ -27,8 +27,8 @@ unityEditor表现和页面css等表现有所不同。因此EditorMD并没有完�
 ***斜体+粗体***
 ***
 ###贴图
- !(Img/Img.jpg)
-效果如下:会自缩放到最大不超过512尺寸
+ ![](Img/Img.jpg)
+效果如下:会自缩放到最大不超过1024尺寸
 !(Img/Img.jpg)
 ***
 ###外部链接
@@ -39,9 +39,13 @@ unityEditor表现和页面css等表现有所不同。因此EditorMD并没有完�
 ***
 ###跳转页面
  >EditorMarkdownAPI
-<color="red">效果如下:EditorMD特有功能，只在Seanlibwindow有效用来跳转到其他同目录下文档。</color>
+<color="red">效果如下:EditorMD特有功能，只在Seanlibwindow有效。用来跳转到其他同目录下文档(相对当前目录)。</color>
 >EditorMarkdownAPI
 ***
+### 跳转页面(doc)
+ >>EditorMarkdownAPI
+<color="red">同上 唯一不同是这个跳转按照文档绝对目录</color>
+>>EditorMarkdownAPI
 ###分割线
  ***
 效果如下
@@ -59,6 +63,11 @@ unityEditor表现和页面css等表现有所不同。因此EditorMD并没有完�
 |刘备|哭|大哥
 |关羽|打|二哥
 |张飞|骂|三弟
+
+<color="red">在EditorMD中 也可以用来横向布局</color>
+ |!(Img/Img.jpg)|<color="red">表格文字</color>|!(Img/Img.jpg)|(https://www.baidu.com/)|>EditorMarkdownAPI
+|!(Img/Img.jpg)|<color="red">表格文字不支持换行</color>|!(Img/Img.jpg)|(https://www.baidu.com/)|>EditorMarkdownAPI
+|<color="red">表格文字不支持换行</color>|!(Img/Img.jpg)|                                              
 ***
 ### 代码块
  ``` 演示代码
@@ -96,3 +105,5 @@ QA
 /{ 折叠名称
 <color="red">效果如下:EditorMD特有功能，只在UnityEditor有效用部分内容折叠。</color>
 /}
+  
+ 

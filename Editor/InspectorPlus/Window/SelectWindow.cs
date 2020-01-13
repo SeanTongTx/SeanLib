@@ -91,7 +91,7 @@ namespace EditorPlus
         }
         #endregion
 
-        protected OnGUIUtility.Search searchField = new OnGUIUtility.Search();
+        public OnGUIUtility.Search searchField = new OnGUIUtility.Search();
         public string ControlId;
         public List<T> List;
 
@@ -100,7 +100,7 @@ namespace EditorPlus
 
         protected CallBack callback;
         protected Vector2 v;
-        protected static class Styles
+        public static class Styles
         {
             public static GUIStyle Selection;
             static Styles()
@@ -108,7 +108,7 @@ namespace EditorPlus
                 Selection = new GUIStyle("OL Title");
             }
         }
-        protected virtual void OnEnable(List<T> list, string controlId, CallBack optional)
+        public virtual void OnEnable(List<T> list, string controlId, CallBack optional)
         {
             CallBack instanceCallBack = defaultCallback;
             instanceCallBack.Merge(optional);
@@ -116,7 +116,7 @@ namespace EditorPlus
             instance.List = list;
             instance.callback= instanceCallBack;
         }
-        protected virtual void Select(T t, int index)
+        public virtual void Select(T t, int index)
         {
             instance.Selected = t;
             instance.SelectedIndex = index;

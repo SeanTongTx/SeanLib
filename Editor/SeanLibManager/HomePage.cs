@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,12 +15,11 @@ namespace EditorPlus
 {
 
     [CustomSeanLibEditor("Home", order = -1)]
-    public class HomePage : EditorMarkDownWindow
+    public class HomePage : SeanLibEditor
     {
-        private bool coding = true;
         public const string packageKey= ".unitypackage:";
         public const string localKey = "LocalPlugins:";
-        public override string RelativePath => "../../../Doc";
+        public string DocDir => "../../../Doc";
         static class Styles
         {
             public static GUIStyle PackageTitle;
@@ -32,10 +31,17 @@ namespace EditorPlus
                 ImportButton = new GUIStyle("OL Title");
             }
         }
+        private MarkDownDoc doc;
         Vector2 HomeScroll;
         public override void OnEnable(SeanLibManager drawer)
         {
             base.OnEnable(drawer);
+            //Load Doc
+            var docAsset=AssetDatabase.LoadAssetAtPath<TextAsset>(PathTools.RelativeAssetPath(this.GetType(), DocDir+ "/Index.md"));
+            if(docAsset)
+            {
+                doc = new MarkDownDoc(DocDir, docAsset.text, true);
+            }
             PackStorageDir = EditorUserSettings.GetConfigValue(packageKey);
             LocalLibDir = EditorUserSettings.GetConfigValue(localKey);
             ReadRemotePluginsFile();
@@ -66,7 +72,7 @@ namespace EditorPlus
         private void GUIToolBar()
         {
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-            GUILayout.Label(Title, EditorStyles.toolbarButton, GUILayout.ExpandWidth(true));
+            GUILayout.Label("SeanLibHome", EditorStyles.toolbarButton, GUILayout.ExpandWidth(true));
             if (GUILayout.Button(EditorGUIUtility.IconContent("RotateTool"), EditorStyles.toolbarButton, GUILayout.Width(26)))
             {
                 ReadPackageFold();
@@ -77,10 +83,9 @@ namespace EditorPlus
         }
         private void ShowIndexDoc()
         {
-            MarkDownDoc readme = null;
-            if (Docs.TryGetValue("Index", out readme))
+            if (doc != null)
             {
-                EditorMarkDownDrawer.DrawDoc(readme);
+                EditorMarkDownDrawer.DrawDoc(doc);
             }
         }
         public override void OnGUI()
@@ -93,7 +98,7 @@ namespace EditorPlus
                 PackStorageDir = OnGUIUtility.OpenFolderPannel(packageKey);
                 LocalLibDir = OnGUIUtility.OpenFolderPannel(localKey);
                 OnGUIUtility.Vision.GUIEnabled(false);
-                var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
+                var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), DocDir);
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("RemotePlugins:", pluginlistPath + "/plugins.json");
                 OnGUIUtility.Vision.GUIEnabled(true);
@@ -165,7 +170,11 @@ namespace EditorPlus
                     item.valueChanged.RemoveListener(window.Repaint);
                 }
             }
-            
+            if(doc!=null)
+            {
+                doc.Release();
+                doc = null;
+            }
             base.OnDisable();
         }
         #region packages
@@ -311,12 +320,13 @@ namespace EditorPlus
                     if (EditorUtility.DisplayDialog(@"Import LocalPlugin", @"导入本地插件时，插件不会复制到项目内，而是存储在原本的目录中，通过绝对路径引用。
 因此不能将项目分享给其他用户！", "这是本地项目", "这是合作项目"))
                     {
-#if UNITY_2020_1_OR_NEWER
-                        Client.Add("file:"+Directory.GetParent(package.URL));
-#elif UNITY_2019_2_OR_NEWER
+
+#if UNITY_2019_2_3
                         var Internal_packageType = typeof(Client).Assembly.GetType("UnityEditor.PackageManager.UI.Package");
                         var addLocalMethod = Internal_packageType.GetMethod("AddFromLocalDisk", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                         addLocalMethod.Invoke(null, new object[] { package.URL });
+#elif UNITY_2019_1_OR_NEWER
+                        Client.Add("file:"+Directory.GetParent(package.URL));
 #endif
                     }
                 }
@@ -338,7 +348,6 @@ namespace EditorPlus
             }
         }
 #endregion
-
         #region RemotePlugin
 
         Vector2 remoteScroll;
@@ -407,13 +416,13 @@ namespace EditorPlus
         }
         private void WriteRemotePluginsFile()
         {
-            var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
+            var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), DocDir);
             DirectoryInfo info = new DirectoryInfo(pluginlistPath);
             FileTools.WriteAllText(info + "/plugins.json", JsonUtility.ToJson(remoteplugins));
         }
         private void ReadRemotePluginsFile()
         {
-            var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), RelativePath);
+            var pluginlistPath = PathTools.RelativeAssetPath(this.GetType(), DocDir);
             DirectoryInfo info = new DirectoryInfo(pluginlistPath);
             remoteplugins = JsonUtility.FromJson<PluginList>(FileTools.ReadAllText(info + "/plugins.json"));
             if (RemotepluginExtends != null)

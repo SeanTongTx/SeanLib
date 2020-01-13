@@ -1,0 +1,5 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+  <uie:Toolbar>
+    <ui:Label text="EditorPlus Settings" style="flex-grow: 1; -unity-text-align: middle-center;" />
+  </uie:Toolbar>
+</ui:UXML>

@@ -15,7 +15,14 @@ namespace EditorPlus
         OnGUIUtility.Zone_Divide2Horizontal zone_Horizon = new OnGUIUtility.Zone_Divide2Horizontal();
         OnGUIUtility.Zone_Divide2Horizontal SubZone_Horizon = new OnGUIUtility.Zone_Divide2Horizontal();
         OnGUIUtility.Zone_Divide2Vertical SubZOne_Vertical = new OnGUIUtility.Zone_Divide2Vertical();
-        protected override string UXML => "../UIElementsDemo/UIElementsDemo";
+        GUIGifDrawer gifDrawer = new GUIGifDrawer();
+        GUIGifDrawer gifDrawer1 = new GUIGifDrawer();
+        protected override ElementsFileAsset FileAsset => new ElementsFileAsset()
+        {
+            BaseType = this.GetType(),
+            USS = "../UIElementsDemo/UIElementsDemo.uss",
+            UXML = "../UIElementsDemo/UIElementsDemo.uxml"
+        };
         protected override bool UseIMGUI => false;
         public override void OnEnable(SeanLibManager drawer)
         {
@@ -71,6 +78,11 @@ namespace EditorPlus
             #endregion
             var DemoIMGUI= window.EditorContent.Q<IMGUIContainer>("IMGUI");
             DemoIMGUI.onGUIHandler = OnGUI;
+            gifDrawer.LoadGIF(PathTools.Asset2File(AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets("gif t:texture")[0])));
+            gifDrawer.Play();
+
+            gifDrawer1.LoadGIF(PathTools.Asset2File(AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets("gif t:texture")[0])));
+            gifDrawer1.Play();
         }
         List<string> strlist = new List<string>() { "asd", "ss", "zxz", "cvx1", "svzxc", "asd", "ss", "zxz", "cvx1", "svzxc", "asd", "ss", "zxz", "cvx1", "svzxc" };
 
@@ -152,8 +164,16 @@ namespace EditorPlus
             GUILayout.Button("SeanLibEditor.styles.Group", SeanLibEditor.styles.ExtendGroup, GUILayout.Width(200));
             GUILayout.Button("SeanLibEditor.styles.Title", SeanLibEditor.styles.Title, GUILayout.Width(200));
             GUILayout.EndScrollView();
-        }
+            Title("GUIGifDrawer.OnGUI");
+            gifDrawer.OnGUI(this.window.Repaint);
+            gifDrawer1.OnGUI(this.window.Repaint);
 
+        }
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            gifDrawer.Clean();
+        }
         public void Title(string title)
         {
             GUILayout.Space(EditorGUIUtility.singleLineHeight);

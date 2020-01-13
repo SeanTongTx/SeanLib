@@ -62,5 +62,16 @@ namespace SeanLib.Core
             Rect newrect = new Rect(rect.position + delta, new Vector2(rect.width, rect.height));
             return newrect;
         }
+        /// <summary>
+        /// 按中心点 等距离缩放
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="delta"></param>
+        /// <returns></returns>
+        public static Rect DeltaCenter(this Rect rect,Vector2 delta)
+        {
+            Rect newrect = new Rect(rect.center - rect.size / 2f- delta, rect.size+delta*2f);
+            return newrect;
+        }
     }
 }

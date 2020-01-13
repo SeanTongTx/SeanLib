@@ -1,7 +1,7 @@
 .editor-index-container
 {
-	min-width:100;
-	max-width:200;
+	min-width:100px;
+	max-width:200px;
 	flex-grow:1;
 }
 .editor-content-container

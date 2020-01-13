@@ -25,7 +25,12 @@ namespace EditorPlus
             /// </summary>
             public class Divide
             {
-                //横向
+                /// <summary>
+                /// 横向等分
+                /// </summary>
+                /// <param name="postion"></param>
+                /// <param name="SegmentsCount"></param>
+                /// <returns></returns>
                 public static Rect FirstRect(Rect postion, int SegmentsCount)
                 {
                     return new Rect(postion.x, postion.y, postion.width / SegmentsCount, postion.height);
@@ -35,6 +40,12 @@ namespace EditorPlus
                     return new Rect(LastRect.x + LastRect.width, LastRect.y, LastRect.width, LastRect.height);
                 }
                 //-------------------------------------
+                /// <summary>
+                /// 黄金分割
+                /// </summary>
+                /// <param name="rect"></param>
+                /// <param name="r2"></param>
+                /// <returns>R1</returns>
                 public static Rect Golden(Rect rect, out Rect r2)
                 {
                     float big = rect.width * 0.618f;
@@ -42,19 +53,38 @@ namespace EditorPlus
                     r2 = new Rect(rect.x + r1.width, rect.y, big, rect.height);
                     return r1;
                 }
+                /// <summary>
+                /// 水平分割
+                /// </summary>
+                /// <param name="source"></param>
+                /// <param name="r1"></param>
+                /// <param name="r1_width"></param>
+                /// <returns>R2</returns>
                 public static Rect Divide2Horizontal(Rect source, out Rect r1, float r1_width)
                 {
                     r1_width = Mathf.Clamp(r1_width, 0f, source.width);
                     r1 = new Rect(source.x, source.y, r1_width, source.height);
                     return new Rect(source.x + r1_width, source.y, source.width - r1_width - 4, source.height);
                 }
+                /// <summary>
+                /// 垂直分割
+                /// </summary>
+                /// <param name="source"></param>
+                /// <param name="r1"></param>
+                /// <param name="r1_height"></param>
+                /// <returns>R2</returns>
                 public static Rect Divide2Vertical(Rect source, out Rect r1, float r1_height)
                 {
                     r1_height = Mathf.Clamp(r1_height, 0f, source.height);
                     r1 = new Rect(source.x, source.y, source.width, r1_height);
                     return new Rect(source.x, source.y + r1_height, source.width, source.height - r1_height - 4);
                 }
-                //纵向
+                /// <summary>
+                /// 纵向等分
+                /// </summary>
+                /// <param name="postion"></param>
+                /// <param name="SegmentsCount"></param>
+                /// <returns></returns>
                 public static Rect FirstRectVertical(Rect postion, int SegmentsCount)
                 {
                     return new Rect(postion.x, postion.y, postion.width, postion.height / SegmentsCount);
@@ -363,9 +393,6 @@ namespace EditorPlus
                 return c;
             }
         }
-        private static void SetComponent(ref Component oc)
-        {
-        }
         public static void GradientField(string label, Gradient value, params GUILayoutOption[] options)
         {
             if (GradientField_label_value_paramsOptions == null)
@@ -374,15 +401,6 @@ namespace EditorPlus
                 GradientField_label_value_paramsOptions = tyEditorGUILayout.GetMethod("GradientField", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) }, null);
             }
             GradientField_label_value_paramsOptions.Invoke(null, new object[] { label, value, options });
-        }
-
-        public static GenericMenu Menu()
-        {
-            if (GUILayout.Button("", Styles.Menu))
-            {
-                return new GenericMenu();
-            }
-            return null;
         }
         [Obsolete("Use Vision.BeginColor")]
         public static void BeginColor(Color color)
@@ -403,11 +421,6 @@ namespace EditorPlus
             Vision.EndBackGroundColor();
             return b;
         }
-        [Obsolete("Use OnGUIUtility.Layout.Header instand ")]
-        public static void Header(string head)
-        {
-            Layout.Header(head);
-        }
         #endregion
         public class Debug
         {
@@ -423,69 +436,19 @@ namespace EditorPlus
             {
                 EditorGUI.DrawRect(rect, color);
             }
+            public static void DrawLastRect(Color color)
+            {
+                if(Event.current.type==EventType.Repaint)
+                {
+                    EditorGUI.DrawRect(GUILayoutUtility.GetLastRect(), color);
+                }
+            }
         }
         #region Cache
         static Dictionary<string, Object> scriptCache = new Dictionary<string, Object>();
         static MethodInfo GradientField_label_value_paramsOptions;
         static int indentLevel;
         #endregion
-        public static class Property
-        {
-            public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
-            {
-                if (!includeChildren)
-                {
-                    return EditorGUI.PropertyField(position, property, label);
-                }
-                else
-                {
-                    Vector2 iconSize = EditorGUIUtility.GetIconSize();
-                    bool enabled = GUI.enabled;
-                    int indentLevel = EditorGUI.indentLevel;
-                    int num2 = indentLevel - property.depth;
-                    SerializedProperty serializedProperty = property.Copy();
-                    SerializedProperty endProperty = serializedProperty.GetEndProperty();
-                    position.height = GetSinglePropertyHeight(serializedProperty, label);
-                    EditorGUI.indentLevel = serializedProperty.depth + num2;
-                    bool enterChildren = DefaultPropertyField(position, serializedProperty, label, false) && serializedProperty.hasVisibleChildren;
-                    position.y += position.height + 2f;
-                    while (serializedProperty.NextVisible(enterChildren) && !SerializedProperty.EqualContents(serializedProperty, endProperty))
-                    {
-                        EditorGUI.indentLevel = serializedProperty.depth + num2;
-                        position.height = EditorGUI.GetPropertyHeight(serializedProperty, null, false);
-                        EditorGUI.BeginChangeCheck();
-                        enterChildren = DefaultPropertyField(position, serializedProperty, null, false) && serializedProperty.hasVisibleChildren;
-                        if (EditorGUI.EndChangeCheck())
-                        {
-                            break;
-                        }
-                        position.y += position.height + 2f;
-                    }
-                    GUI.enabled = enabled;
-                    EditorGUIUtility.SetIconSize(iconSize);
-                    EditorGUI.indentLevel = indentLevel;
-                    return false;
-                }
-            }
-            public static float GetSinglePropertyHeight(SerializedProperty property, GUIContent label)
-            {
-                float result;
-                if (property == null)
-                {
-                    result = EditorGUIUtility.singleLineHeight;
-                }
-                else
-                {
-                    result = EditorGUI.GetPropertyHeight(property.propertyType, label);
-                }
-                return result;
-            }
-
-            public static object GetValue<T>(SerializedProperty prop)
-            {
-                return prop.GetValue<T>();
-            }
-        }
         public static class Colors
         {
             //原色
@@ -498,12 +461,16 @@ namespace EditorPlus
             public static Color blue = new Color(0.5f, 0.5f, 0.9f);
             public static Color blue_light = new Color(0.8f, 0.8f, 1f);
 
+            public static Color mask = new Color(0, 0, 0, .3f);
             //混合色
             public static Color purple = new Color(0.8f, 0.1f, 0.8f);
             public static Color purple_light = new Color(0.8f, 0.3f, 0.8f);
 
             public static Color yellow = new Color(0.8f, 0.8f, 0.1f);
             public static Color yellow_light = new Color(0.8f, 0.8f, 0.3f);
+
+            //skin适配
+            public static Color HightLight = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 0.5f) : new Color(0.8f, 0.8f, 0.1f, 0.5f);
         }
     }
 }

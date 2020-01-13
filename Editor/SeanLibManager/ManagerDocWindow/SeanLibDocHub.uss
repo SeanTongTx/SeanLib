@@ -1,0 +1,15 @@
+.editor-index-container
+{
+	min-width:0px;
+	max-width:300px;
+	flex-grow:1;
+}
+.editor-content-container
+{
+	flex-grow:1;
+}
+
+#EditorIndexContent_IMGUI
+{
+	flex-grow:1;
+}

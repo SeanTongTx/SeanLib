@@ -1,22 +1,22 @@
-Label:hover
+ï»¿Label:hover
 {
 	color:rgb(255,255,255);
 }
 /*split pannel*/
-/*Ä¬ÈÏ ·Ö¸îÃæ°åÊÇµ¯ĞÔ100%Ìî³ä¸¸½Úµã*/
+/*é»˜è®¤ åˆ†å‰²é¢æ¿æ˜¯å¼¹æ€§100%å¡«å……çˆ¶èŠ‚ç‚¹*/
 SplitPannel
 {
 	flex-grow:1;
 }
-/*ÔÚscrollViewÖĞµÄ±ØĞëfixed´óĞ¡*/
+/*åœ¨scrollViewä¸­çš„å¿…é¡»fixedå¤§å°*/
 .child-split-pannel
 {
-	height:300;
+	height:300px;
 }
 .child-split-pannel_1
 {
-	min-height:100;
-	max-height:200;
+	min-height:100px;
+	max-height:200px;
 	flex-grow:1;
 	background-color:#555
 }
@@ -30,7 +30,7 @@ SplitPannel
     /* Provide the list view with an explict height for every row
     so it can calculate how many items to actually display */
     --unity-item-height: 16;
-	min-width:100;
-	max-width:300;
+	min-width:100px;
+	max-width:300px;
 	flex-grow:1;
 }

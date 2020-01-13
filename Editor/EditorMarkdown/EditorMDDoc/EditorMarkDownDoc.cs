@@ -4,16 +4,11 @@ using UnityEngine;
 
 namespace EditorPlus
 {
-    [CustomSeanLibEditor("EditorPlus/EditorMD", order = 100)]
+    [CustomSeanLibEditor("EditorPlus/EditorMD", order = 100,IsDoc =true)]
     public class EditorMarkDownDoc : EditorMarkDownWindow
     {
         public override string RelativePath => "../../../../Doc/EditorPlus/EditorMarkdown";
-        public override bool SearchField
-        {
-            get
-            {
-                return true;
-            }
-        }
+
+        public override bool EditScript => false;
     }
 }

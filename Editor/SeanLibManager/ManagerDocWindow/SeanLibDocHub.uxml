@@ -1,0 +1,9 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:uib="Unity.UI.Builder">
+  <SplitPannel index="1" init-size="100" orientation="horizontal">
+    <VisualElement name="EditorContent" class="editor-content-container">
+    </VisualElement>
+    <VisualElement name="EditorIndex" class="editor-index-container">
+      <IMGUIContainer name="EditorIndexContent_IMGUI"/>
+    </VisualElement>
+  </SplitPannel>
+</UXML>

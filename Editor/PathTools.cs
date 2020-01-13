@@ -60,8 +60,6 @@ public static class PathTools
         return null;
     }
     /// <summary>
-    /// 仅对项目文件夹下的资源有效
-    /// 如果资源目录是package下的话 是找不到的
     /// </summary>
     /// <param name="assetpath"></param>
     /// <returns></returns>
@@ -87,8 +85,9 @@ public static class PathTools
     /// <returns></returns>
     public static string File2Asset(string filepath)
     {
-        if (IsAssetPath(filepath))
+        if (!IsAssetPath(filepath))
         {
+
             filepath = filepath.Replace(@"\", "/");
             var AssetPath = filepath.Replace(Application.dataPath, "Assets");
 

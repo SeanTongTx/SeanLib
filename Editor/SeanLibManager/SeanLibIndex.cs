@@ -11,8 +11,10 @@ namespace EditorPlus
     public class SeanLibIndex : TreeView
     {
         public List<SeanLibEditor> editors = new List<SeanLibEditor>();
-        public SeanLibIndex(TreeViewState state) : base(state)
+        private bool isdoc;
+        public SeanLibIndex(TreeViewState state,bool isDoc=false) : base(state)
         {
+            this.isdoc = isDoc;
         }
         public SeanLibEditor GetEditor(int id)
         {
@@ -79,6 +81,7 @@ namespace EditorPlus
         public void RefreshTreeData(SeanLibManager drawer)
         {
             var editorTypes = AssemblyTool.FindTypesInCurrentDomainWhereAttributeIs<CustomSeanLibEditor>();
+            editorTypes.RemoveAll(e => ReflecTool.GetAttribute<CustomSeanLibEditor>(e).IsDoc != isdoc);
             editorTypes.Sort((l, r) =>
             {
                 return ReflecTool.GetAttribute<CustomSeanLibEditor>(l).order - ReflecTool.GetAttribute<CustomSeanLibEditor>(r).order;
@@ -106,7 +109,9 @@ namespace EditorPlus
         public Rect position;
         public IMGUIContainer EditorContent_IMGUI;
         public VisualElement EditorContent_Elements => window.EditorContent;
+        [Obsolete("Use FileAsset instead")]
         protected virtual string UXML => string.Empty;
+        protected virtual ElementsFileAsset FileAsset => new ElementsFileAsset();
 
         protected StyleSheet editorContent_styles;
         protected virtual bool UseIMGUI => true;
@@ -133,10 +138,18 @@ namespace EditorPlus
         }
         public virtual void SetupUIElements()
         {
+            //Obsolete
             if (!string.IsNullOrEmpty(UXML))
             {
                 var editorContent = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(this.GetType(),UXML+".uxml"));
                 editorContent_styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(this.GetType(), UXML+".uss"));
+                window.EditorContent.styleSheets.Add(editorContent_styles);
+                editorContent.CloneTree(window.EditorContent);
+            }
+            else if (!string.IsNullOrEmpty(FileAsset.UXML))
+            {
+                var editorContent = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(PathTools.RelativeAssetPath(FileAsset.BaseType, FileAsset.UXML));
+                editorContent_styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(FileAsset.BaseType, FileAsset.USS));
                 window.EditorContent.styleSheets.Add(editorContent_styles);
                 editorContent.CloneTree(window.EditorContent);
             }
@@ -145,6 +158,11 @@ namespace EditorPlus
         {
             EditorContent_IMGUI = new IMGUIContainer(OnGUI);
             EditorContent_IMGUI.name = "EditorContent_IMGUI";
+            if (!string.IsNullOrEmpty(FileAsset.UXML))
+            {
+                editorContent_styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(PathTools.RelativeAssetPath(FileAsset.BaseType, FileAsset.USS));
+                window.EditorContent.styleSheets.Add(editorContent_styles);
+            }
             EditorContent_IMGUI.style.flexGrow = 1;
             window.EditorContent.Add(EditorContent_IMGUI);
         }
@@ -174,6 +192,7 @@ namespace EditorPlus
     {
         public string Path;
         public int order;
+        public bool IsDoc;
         public CustomSeanLibEditor(string path)
         {
             this.Path = path;

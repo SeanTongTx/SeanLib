@@ -9,79 +9,25 @@ namespace EditorPlus
 {
     public class EditorMarkDownDrawer
     {
-        //MD styles
-        static class MDStyles
-        {
-            public static GUIStyle Title1;
-            public static GUIStyle Title2;
-            public static GUIStyle Title3;
-            public static GUIStyle FontI;
-            public static GUIStyle FontB;
-            public static GUIStyle FontBI;
-            public static GUIStyle Link;
-            public static GUIStyle Font;
-            public static GUIStyle Area;
-            public static GUIStyle Page;
-            static MDStyles()
-            {
-                Title1 = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                Title1.fontStyle = FontStyle.Bold;
-                Title1.fontSize = (int)EditorGUIUtility.singleLineHeight * 3;
-                Title1.normal.textColor = EditorGUIUtility.isProSkin?Color.white: Color.black;
-
-                Title2 = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                Title2.fontStyle = FontStyle.Bold;
-                Title2.fontSize = (int)EditorGUIUtility.singleLineHeight * 2;
-                Title2.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                
-
-                Title3 = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                Title3.fontStyle = FontStyle.Bold;
-                Title3.fontSize = (int)EditorGUIUtility.singleLineHeight * 1;
-                Title3.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-
-                Page = new GUIStyle(Title3);
-                Page.normal.textColor = EditorGUIUtility.isProSkin ? Color.cyan : Color.cyan/2;
-                Page.active.textColor = Color.white;
-
-                Font = new GUIStyle(OnGUIUtility.Fonts.RichText);
-
-                FontI = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                FontI.fontStyle = FontStyle.Italic;
-
-                FontB = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                FontB.fontStyle = FontStyle.Bold;
-
-                FontBI = new GUIStyle(OnGUIUtility.Fonts.RichText);
-                FontBI.fontStyle = FontStyle.BoldAndItalic;
-
-                Link = new GUIStyle("PR PrefabLabel");
-
-                Area = new GUIStyle(EditorStyles.textArea);
-                Area.richText = true;
-            }
-        }
-        public static void DrawDoc(MarkDownDoc doc, OnGUIUtility.Search search = null, Action<string> PageChange = null)
+        public static void DrawDoc(MarkDownDoc doc, Action<string> PageChange = null,Action<string>DocChange=null,Action Repaint=null)
         {
             foreach (var data in doc.datas)
             {
-                if (search != null && !string.IsNullOrEmpty(search.Current))
+                DrawData(data, PageChange, DocChange, Repaint);
+                if (Event.current.type == EventType.Repaint)
                 {
-                    if (!data.keyValue.ToLower().Contains(search.Current.ToLower()))
-                    {
-                        continue;
-                    }
+                    data.drawRect = GUILayoutUtility.GetLastRect();
                 }
-                DrawData(data, PageChange);
             }
         }
-        private static void DrawData(MarkDownData data, Action<string> PageChange)
+        private static void DrawData(MarkDownData data, Action<string> PageChange, Action<string> DocChange,Action Repaint)
         {
+            var doc = data.doc;
             switch (data.type)
             {
                 case KeyType.foldin:
                     data.doc.InFoldout = true;
-                    data.doc.CurrentFoldout = OnGUIUtility.Foldout(data.keyValue, MDStyles.Title3, GUILayout.ExpandWidth(true),GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f));// OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
+                    data.doc.CurrentFoldout = OnGUIUtility.Foldout(data.keyValue, doc.Styles.Foldout, GUILayout.ExpandWidth(true),GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f));// OnGUIUtility.EditorPrefsFoldoutGroup(data.keyValue);
                     OnGUIUtility.Layout.IndentBegin(2);
                     break;
                 case KeyType.foldout:
@@ -96,18 +42,25 @@ namespace EditorPlus
             switch (data.type)
             {
                 case KeyType.text:
-                    EditorGUILayout.SelectableLabel(data.Data, MDStyles.Font, GUILayout.ExpandWidth(true), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                    Rect position = GUILayoutUtility.GetRect(EditorGUIUtility.TrTextContent(data.Data), doc.Styles.Font,GUILayout.ExpandHeight(true));
+                    OnGUIUtility.Layout.IndentDisable();
+                    EditorGUI.SelectableLabel(position, data.Data, doc.Styles.Font);
+                    OnGUIUtility.Layout.IndentEnable();
                     break;
                 case KeyType.code:
-                    EditorGUILayout.TextArea(data.Data, MDStyles.Area);
+                    OnGUIUtility.Vision.BeginBackGroundColor(ColorPalette.Get(doc.ColorSetting, "Area_BackGround", EditorGUIUtility.isProSkin ? Color.white : Color.black));
+                    EditorGUILayout.TextArea(data.Data, doc.Styles.Area);
+                    OnGUIUtility.Vision.EndBackGroundColor();
                     break;
                 case KeyType.qa:
-                    EditorGUILayout.SelectableLabel(RichTextHelper.Color(data.keyValue, Color.green), MDStyles.Font, GUILayout.ExpandWidth(true), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                    OnGUIUtility.Vision.BeginBackGroundColor(ColorPalette.Get(doc.ColorSetting, "Area_BackGround", EditorGUIUtility.isProSkin ? Color.white : Color.black));
 
-                    EditorGUILayout.TextArea(data.Data, MDStyles.Area);
+                    EditorGUILayout.SelectableLabel(RichTextHelper.Color(data.keyValue, Color.green), doc.Styles.Font, GUILayout.ExpandWidth(true), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                    EditorGUILayout.TextArea(data.Data, doc.Styles.Area);
+                    OnGUIUtility.Vision.EndBackGroundColor();
                     break;
                 case KeyType.font:
-                    GUIStyle fontstyle = data.keyValue == "B" ? MDStyles.FontB : data.keyValue == "I" ? MDStyles.FontI : data.keyValue == "BI" ? MDStyles.FontBI : MDStyles.Font;
+                    GUIStyle fontstyle = data.keyValue == "B" ? doc.Styles.FontB : data.keyValue == "I" ? doc.Styles.FontI : data.keyValue == "BI" ? doc.Styles.FontBI : doc.Styles.Font;
                     EditorGUILayout.SelectableLabel(data.Data, fontstyle, GUILayout.Height(EditorGUIUtility.singleLineHeight));
                     break;
                 case KeyType.title:
@@ -115,9 +68,9 @@ namespace EditorPlus
                     GUIStyle style = EditorStyles.boldLabel;
                     switch (size)
                     {
-                        case 1: style = MDStyles.Title3; break;
-                        case 2: style = MDStyles.Title2; break;
-                        case 3: style = MDStyles.Title1; break;
+                        case 1: style = doc.Styles.Title3; break;
+                        case 2: style = doc.Styles.Title2; break;
+                        case 3: style = doc.Styles.Title1; break;
                     }
                     EditorGUILayout.SelectableLabel(data.Data, style, GUILayout.Height(EditorGUIUtility.singleLineHeight * size * 1.3f), GUILayout.MinWidth(500));
                     if (size == 3)
@@ -126,7 +79,7 @@ namespace EditorPlus
                     }
                     break;
                 case KeyType.link:
-                    if (GUILayout.Button(data.Data, MDStyles.Link))
+                    if (GUILayout.Button(data.Data, doc.Styles.Link))
                     {
                         EditorGUIUtility.systemCopyBuffer = data.Data;
                         Application.OpenURL(data.Data);
@@ -160,32 +113,33 @@ namespace EditorPlus
                             GUI.DrawTexture(rect, data.texture);
                         }
                     }
+                    else if(data.gifDrawer!=null&& Repaint!=null)
+                    {
+                        data.gifDrawer.OnGUI(Repaint);
+                    }
                     break;
                 case KeyType.separator:
                     OnGUIUtility.Layout.Line();
                     break;
                 case KeyType.page:
-                    if (GUILayout.Button("▶" + data.Data, MDStyles.Page, GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f)))
+                    if (GUILayout.Button("▶" + data.Data, doc.Styles.Page, GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f)))
                     {
                         PageChange?.Invoke(data.Data);
                     }
                     break;
+                case KeyType.doc:
+                    if (GUILayout.Button("▶" + data.Data, doc.Styles.Doc, GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 1.3f)))
+                    {
+                        DocChange?.Invoke(data.Data);
+                    }
+                    break;
                 case KeyType.table:
                     GUILayout.BeginHorizontal();
-                    string[] datas = data.Data.Split('|');
-                    foreach (var d in datas)
+                    foreach (var item in data.subdatas)
                     {
-                        if (d.IsNOTNullOrEmpty())
-                        {
-                            if (d == "--:")
-                            {
-                                OnGUIUtility.Layout.Line();
-                            }
-                            else
-                            {
-                                EditorGUILayout.SelectableLabel(d, MDStyles.Font, GUILayout.ExpandWidth(true), GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                            }
-                        }
+                        //OnGUIUtility.Debug.ButtonTest();
+                        DrawData(item, PageChange, DocChange, Repaint);
+                        //OnGUIUtility.Debug.DrawLastRect(Color.white);
                     }
                     GUILayout.EndHorizontal();
                     break;

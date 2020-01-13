@@ -31,6 +31,11 @@ namespace SeanLib.Core
         {
 
         }
+        //隐藏
+        public class HideInInspector: InspectorPlusAttribute
+        {
+
+        }
         /// <summary>
         /// GUID生成按钮
         /// </summary>
